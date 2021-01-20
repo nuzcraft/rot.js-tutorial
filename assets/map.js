@@ -11,6 +11,8 @@ Game.Map = function(tiles, player) {
     this.setupFov();
     // create a list which will hold the entities
     this._entities = {};
+    // create a table which will hold the items
+    this._items = {};
     // create the engine and scheduler
     this._scheduler = new ROT.Scheduler.Simple();
     this._engine = new ROT.Engine(this._scheduler);
@@ -212,3 +214,36 @@ Game.Map.prototype.updateEntityPosition = function(entity, oldX, oldY, oldZ) {
     // add the entity to the table of entities
     this._entities[key] = entity;
 }
+
+Game.Map.prototype.getItemsAt = function(x, y, z) {
+    return this._items[x + ',' + y + ',' + z];
+};
+
+Game.Map.prototype.setItemsAt = function(x, y, z, items) {
+    // if our items array is empty, then delete the key from the table.
+    var key = x + ',' + y + ',' + z;
+    if (items.length == 0) {
+        if (this._items[key]) {
+            delete this._items[key];
+        }
+    } else {
+        // simply update the items at that key
+        this._items[key] = items;
+    }
+};
+
+Game.Map.prototype.addItem = function(x, y, z, item) {
+    // if we already have items at the position, simply append
+    // the item to the list of items
+    var key = x + ',' + y + ',' + z;
+    if (this._items[key]) {
+        this._items[key].push(item);
+    } else {
+        this._items[key] = [item];
+    }
+};
+
+Game.Map.prototype.addItemAtRandomPosition = function(item, z) {
+    var position = this.getRandomFloorPosition(z);
+    this.addItem(position.x, position.y, position.z, item);
+};
