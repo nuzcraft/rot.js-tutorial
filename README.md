@@ -3,6 +3,9 @@ Hello! Welcome to my project for learning rot.js. We'll be following this tutori
 http://www.codingcookies.com/2013/04/01/building-a-roguelike-in-javascript-part-1/
 I've not done *any* research to see if the tutorial goes all the way to the end of a finished game, but regardless, we're gonna take a shot!
 
+### 2020.01.20
+Happy Inauguration Day! To celebrate, I'm going to eat some mac n cheese, drink a margarita, and work on some of coding! Today, I'm going to try to tackle part 10a - adding items and an inventory to our game. We'll see how it goes!
+
 ### 2020.01.16
 Good day! I'm planning on tackling part 9 today!
 
