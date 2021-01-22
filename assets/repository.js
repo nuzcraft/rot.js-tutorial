@@ -29,3 +29,8 @@ Game.Repository.prototype.createRandom = function() {
     // pick a random key and create an object based off of it
     return this.create(Object.keys(this._templates).random());
 }
+
+Array.prototype.random = function() {
+    if (!this.length) {return null;}
+    return this[Math.floor(Math.random() * this.length)];
+}

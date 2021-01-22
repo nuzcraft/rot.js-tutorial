@@ -53,11 +53,8 @@ Game.Mixins.FungusActor = {
                     // if so then we grow!
                     if (this.getMap().isEmptyFloor(this.getX() + xOffset, 
                         this.getY() + yOffset, this.getZ())) {
-                        var fungusTemplate = Game.FungusTemplate;
-                        if (this.getFungusType() == 'red fungus') {
-                            fungusTemplate = Game.RedFungusTemplate;
-                        }
-                        var entity = new Game.Entity(fungusTemplate);
+                        // use getFungusType to check the type of fungus and grow the same kind
+                        var entity = Game.EntityRepository.create(this.getFungusType());
                         entity.setPosition(this.getX() + xOffset,
                             this.getY() + yOffset, this.getZ());
                         this.getMap().addEntity(entity);
