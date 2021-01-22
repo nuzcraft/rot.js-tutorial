@@ -134,7 +134,7 @@ Game.Map.prototype.getEntitiesWithinRadius = function(centerX, centerY, centerZ,
     for (var key in this._entities) {
         var entity = this._entities[key];
         if (entity.getX() >= leftX && entity.getX() <= rightX &&
-            entity.getY() >= topY && entity.getY <= bottomY &&
+            entity.getY() >= topY && entity.getY() <= bottomY &&
             entity.getZ() == centerZ) {
             results.push(entity);
         }
