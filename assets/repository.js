@@ -9,7 +9,7 @@ Game.Repository = function(name, ctor) {
 
 // define a new named template
 Game.Repository.prototype.define = function(name, template) {
-    this.templates[name] = template;
+    this._templates[name] = template;
 };
 
 // create an object based on a template
