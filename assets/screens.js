@@ -29,6 +29,7 @@ Game.Screen.playScreen = {
     _map: null,
     _player: null,
     _gameEnded: false,
+    _subScreen: null,
     enter: function() {
         // create a map based on our size parameters
         var width = 100;
@@ -52,6 +53,11 @@ Game.Screen.playScreen = {
         console.log("Exited play screen");
     },
     render: function(display) {
+        // render subscreen if there is one
+        if (this._subScreen) {
+            this._subScreen.render(display);
+            return;
+        };
         var screenWidth = Game.getScreenWidth();
         var screenHeight = Game.getScreenHeight();
         // make sure the x axis doesn't go to the left of the left bound
@@ -137,6 +143,11 @@ Game.Screen.playScreen = {
             // retun to tmake sure the user can't still play
             return
         }
+        // handle subscreen input if there is one
+        if (this._subScreen) {
+            this._subScreen.handleInput(inputType, inputData);
+            return;
+        };
         if (inputType === 'keydown') {
             // if enter is pressed, go to the win screen
             // if escape is pressed, go to the lose screen
@@ -174,6 +185,11 @@ Game.Screen.playScreen = {
     },
     setGameEnded: function(gameEnded) {
         this._gameEnded = gameEnded;
+    },
+    setSubScreen: function(subScreen) {
+        this._subScreen = subScreen;
+        // refresh screen on changing the subscreen
+        Game.refresh();
     }
 }
 
@@ -229,3 +245,33 @@ Game.Screen.ItemListScreen = function(template) {
     // wheter the user can select multiple items
     this._canSelectMultipleItems = template['canSelectMultipleItems'];
 }
+
+Game.Screen.ItemListScreen.prototype.setup = function(player, items) {
+    this._player = player;
+    // should be called before switching to the screen
+    this._items = items;
+    // clearn set of selected indicies
+    this._selectedIndices = {};
+};
+
+Game.Screen.ItemListScreen.prototype.render = function(display) {
+    var letters = 'abcdefghijklmnopqrstuvwxyz';
+    // rendeer the caption in the top row
+    display.drawText(0, 0, this._caption);
+    var row = 0;
+    for (var i = 0; i < this._items.length; i++) {
+        // if we have an item, we want to render it
+        if (this._items[i]) {
+            // get the letter matching the item's index
+            var letter = letters.substring(i, i + 1);
+            // if we have selected an item, show a +, else show a dash between
+            // the letter and the item's name
+            var selectionState = (this._canSelectItem && this._canSelectMultipleItems &&
+                this._selectedIndices[i]) ? '+' : '-';
+            // render at the correct row and add 2
+            display.drawText(0, 2 + row, letter + ' ' + selectionState + ' ' + 
+                this._items[i].describe());
+            row++;
+        }
+    }
+};
