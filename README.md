@@ -3,6 +3,12 @@ Hello! Welcome to my project for learning rot.js. We'll be following this tutori
 http://www.codingcookies.com/2013/04/01/building-a-roguelike-in-javascript-part-1/
 I've not done *any* research to see if the tutorial goes all the way to the end of a finished game, but regardless, we're gonna take a shot!
 
+### 2020.01.23
+Today I'm going to start on part 10b - Inventory and Item Management. Now that we've added items to the game, it's time for the player to be able to pick them up!
+
+### 2020.01.22
+Well, progress didn't happen on the 20th, but I came back today and got part 10a finished. Once again, I had issues with some minor typos, but it's cool seeing how easy it is to add both entities and items to the game now the part 10a is finished. Ah, I almost forgot, during this section, I implemented git source control for the project.
+
 ### 2020.01.20
 Happy Inauguration Day! To celebrate, I'm going to eat some mac n cheese, drink a margarita, and work on some of coding! Today, I'm going to try to tackle part 10a - adding items and an inventory to our game. We'll see how it goes!
 
