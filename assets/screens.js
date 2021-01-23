@@ -219,3 +219,13 @@ Game.Screen.loseScreen = {
         // nothing to do here
     }
 }
+
+Game.Screen.ItemListScreen = function(template) {
+    // set up based on the template
+    this._caption = template['caption'];
+    this._okFunction = template['ok'];
+    // whether the user can select items at all
+    this._canSelectItem = template['canSelect'];
+    // wheter the user can select multiple items
+    this._canSelectMultipleItems = template['canSelectMultipleItems'];
+}
