@@ -6,6 +6,8 @@ I've not done *any* research to see if the tutorial goes all the way to the end 
 ### 2020.01.23
 Today I'm going to start on part 10b - Inventory and Item Management. Now that we've added items to the game, it's time for the player to be able to pick them up!
 
+Hoo boy, this was tough to get finished. There was a lot to unpack here, and there wasn't any great chances to test any of it before the code was finished. I'm happy with the result though, it's a simple screen that can server a bunch of purposes and seems like it will be easy to implement for more things later.
+
 ### 2020.01.22
 Well, progress didn't happen on the 20th, but I came back today and got part 10a finished. Once again, I had issues with some minor typos, but it's cool seeing how easy it is to add both entities and items to the game now the part 10a is finished. Ah, I almost forgot, during this section, I implemented git source control for the project.
 
