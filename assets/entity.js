@@ -140,6 +140,15 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
     } else if (tile.isWalkable()) {
         // update the entity's position
         this.setPosition(x, y, z);
+        // notify the entity that there are items at this position
+        var items = this.getMap().getItemsAt(x, y, z);
+        if (items) {
+            if (items.length === 1) {
+                Game.sendMessage(this, "You see %s.", [items[0].describeA()]);
+            } else {
+                Game.sendMessage(this, "There are several objects here.");
+            }
+        }
         return true;
     // check if the tile is diggable, and if so try to dig it
     } else if (tile.isDiggable()) {

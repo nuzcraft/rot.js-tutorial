@@ -189,7 +189,7 @@ Game.Mixins.InventoryHolder = {
     addItem: function(item) {
         // try to find a slot, returning true only if we could add the item
         for (var i = 0; i < this._items.length; i++) {
-            if (!this.items[i]) {
+            if (!this._items[i]) {
                 this._items[i] = item;
                 return true;
             }
@@ -219,7 +219,7 @@ Game.Mixins.InventoryHolder = {
             // item out of the list of items. In order to fetch the right item, 
             // we have to offset the number of items already added
             if (this.addItem(mapItems[indices[i] - added])) {
-                mapItems.splice(indicies[i] - added, 1);
+                mapItems.splice(indices[i] - added, 1);
                 added++;
             } else {
                 // inventory is full
@@ -229,7 +229,7 @@ Game.Mixins.InventoryHolder = {
         // update the map items
         this._map.setItemsAt(this.getX(), this.getY(), this.getZ(), mapItems);
         // return true only if we added all items
-        return added === indicies.length;
+        return added === indices.length;
     },
     dropItem: function(i) {
         // drops an item to the current map tile

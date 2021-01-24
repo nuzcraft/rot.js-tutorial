@@ -165,6 +165,50 @@ Game.Screen.playScreen = {
                     this.move(0, -1, 0);
                 } else if (inputData.keyCode === ROT.KEYS.VK_DOWN) {
                     this.move(0, 1, 0);
+                } else if (inputData.keyCode === ROT.KEYS.VK_I) {
+                    if (this._player.getItems().filter(function(x){return x;}).length === 0) {
+                        // if the player has no items, send a message and don't take a turn
+                        Game.sendMessage(this._player, "You are not carrying anything!");
+                        Game.refresh()
+                    } else {
+                        // show the inventory
+                        Game.Screen.inventoryScreen.setup(this._player, this._player.getItems());
+                        this.setSubScreen(Game.Screen.inventoryScreen);
+                    }
+                    return;
+                } else if (inputData.keyCode === ROT.KEYS.VK_D) {
+                    if (this._player.getItems().filter(function(x){return x;}).length === 0) {
+                        // if the player has no items, send a messag and don't take a turn
+                        Game.sendMessage(this._player, "You have nothing to drop!");
+                        Game.refresh();
+                    } else {
+                        // show the drop screen
+                        Game.Screen.dropScreen.setup(this._player, this._player.getItems());
+                        this.setSubScreen(Game.Screen.dropScreen);
+                    }
+                    return;
+                } else if (inputData.keyCode === ROT.KEYS.VK_COMMA) {
+                    var items = this._map.getItemsAt(this._player.getX(), this._player.getY(), this._player.getZ());
+                    // if there are no items, show a message
+                    if (!items) {
+                        Game.sendMessage(this._player, "There is nothing here to pick up.");
+                    } else if (items.length === 1) {
+                        // if only one item, try to pick it up
+                        var item = items[0];
+                        if (this._player.pickupItems([0])) {
+                            Game.sendMessage(this._player, "You pick up %s", [item.describeA()]);
+                        } else {
+                            Game.sendMessage(this._player, "Your inventory is full! Nothing was picked up.");
+                        }
+                    } else {
+                        // show the pickup screen if there are any items
+                        Game.Screen.pickupScreen.setup(this._player, items);
+                        this.setSubScreen(Game.Screen.pickupScreen);
+                        return;
+                    }
+                } else {
+                    // not a valid key
+                    return;
                 }
                 // unlock the engine
                 this._map.getEngine().unlock();
@@ -275,3 +319,84 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
         }
     }
 };
+
+Game.Screen.ItemListScreen.prototype.executeOkFunction = function()  {
+    // gather the selected items
+    var selectedItems = {};
+    for (var key in this._selectedIndices) {
+        selectedItems[key] = this._items[key];
+    }
+    // switch back to the play screen
+    Game.Screen.playScreen.setSubScreen(undefined);
+    // call the OK function and end the player's turn if it returns true
+    if (this._okFunction(selectedItems)) {
+        this._player.getMap().getEngine().unlock();
+    }
+};
+
+Game.Screen.ItemListScreen.prototype.handleInput = function(inputType, inputData) {
+    if (inputType === 'keydown') {
+        // if the user hit escape, hit enter and can't select an item, or hit
+        // enter without any items selecte, simply cancel out
+        if (inputData.keyCode === ROT.KEYS.VK_ESCAPE ||
+            (inputData.keyCode === ROT.KEYS.VK_RETURN &&
+                (!this._canSelectItem || Object.keys(this._selectedIndices).length === 0))) {
+            Game.Screen.playScreen.setSubScreen(undefined);
+        // handle pressing return when items are selected
+        } else if (inputData.keyCode === ROT.KEYS.VK_RETURN) {
+            this.executeOkFunction();
+        // handle pressing return when items are selected
+        } else if (this._canSelectItem && inputData.keyCode >= ROT.KEYS.VK_A &&
+            inputData.keyCode <= ROT.KEYS.VK_Z) {
+            // chec if it maps to a valid item by subtracting 'a' from the character
+            // to know what letter of the alphabet we used
+            var index = inputData.keyCode - ROT.KEYS.VK_A;
+            if (this._items[index]) {
+                // if multiple selection is allowed, toggle the selection status, else
+                // select the item and exit the screen
+                if (this._canSelectMultipleItems) {
+                    if (this._selectedIndices[index]) {
+                        delete this._selectedIndices[index];
+                    } else {
+                        this._selectedIndices[index] = true;
+                    }
+                    // Redraw screen
+                    Game.refresh();
+                } else {
+                    this._selectedIndices[index] = true;
+                    this.executeOkFunction();
+                }
+            }
+        }
+    }
+};
+
+Game.Screen.inventoryScreen = new Game.Screen.ItemListScreen({
+    caption: 'Inventory',
+    canSelect: false
+});
+
+Game.Screen.pickupScreen = new Game.Screen.ItemListScreen({
+    caption: 'Choose the items you wish to pick up',
+    canSelect: true,
+    canSelectMultipleItems: true,
+    ok: function(selectedItems) {
+        // try to pick up all items, messaging the player if they couldn't all be
+        // picked up
+        if (!this._player.pickupItems(Object.keys(selectedItems))) {
+            Game.sendMessage(this._player, "Your inventory is full! Not all items were picked up.");
+        }
+        return true;
+    }
+});
+
+Game.Screen.dropScreen = new Game.Screen.ItemListScreen({
+    caption: 'Choose the item you wish to drop',
+    canSelect: true,
+    canSelectMultipleItems: false,
+    ok: function(selectedItems) {
+        // drop the selected item
+        this._player.dropItem(Object.keys(selectedItems)[0]);
+        return true;
+    }
+});
