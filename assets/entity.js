@@ -9,6 +9,7 @@ Game.Entity = function(properties) {
     this._y = properties['y'] || 0;
     this._z = properties['z'] || 0;
     this._map = null;
+    this._alive = true;
     // create an object which will keep track what mixins we have
     // attached to the entity based on the name property
     this._attachedMixins = {};
@@ -142,4 +143,28 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
         }
     }
     return false;
-}
+};
+
+Game.Entity.prototype.isAlive = function() {
+    return this._alive;
+};
+
+Game.Entity.prototype.kill = function(message) {
+    // only kill once!
+    if (!this._alive) {
+        return;
+    }
+    this._alive = false;
+    if (message) {
+        Game.sendMessage(this, message);
+    } else {
+        Game.sendMessage(this, "You have died!");
+    }
+
+    // check if the player died, and if so call their act method to prmpt the user
+    if (this.hasMixin(Game.EntityMixins.PlayerActor)) {
+        this.act();
+    } else {
+        this.getMap().removeEntity(this);
+    }
+};
