@@ -7,8 +7,13 @@ Game.EntityMixins.PlayerActor = {
     name: 'PlayerActor',
     groupName: 'Actor',
     act: function() {
+        if (this._acting) {
+            return;
+        }
+        this._acting = true;
+        this.addTurnHunger();
         // detect if the game is over
-        if (this.getHp() < 1) {
+        if (!this.isAlive()) {
             Game.Screen.playScreen.setGameEnded(true);
             // send a message to the player
             Game.sendMessage(this, 'You have died... Press [Enter] to continue!');
@@ -20,6 +25,7 @@ Game.EntityMixins.PlayerActor = {
         this.getMap().getEngine().lock();
         // clear the message queue
         this.clearMessages();
+        this._acting = false;
     }
 }
 
@@ -108,12 +114,7 @@ Game.EntityMixins.Destructible = {
         // if have 0 hp or less, remove ourselves from the map
         if (this._hp <= 0) {
             Game.sendMessage(attacker, 'You kill the %s!', [this.getName()]);
-            // check if the player died, and if so call their act method to prompt the user
-            if (this.hasMixin(Game.EntityMixins.PlayerActor)) {
-                this.act();
-            } else {
-                this.getMap().removeEntity(this);
-            }
+            this.kill();
         }
     }
 }
@@ -241,3 +242,42 @@ Game.EntityMixins.InventoryHolder = {
         }
     }
 };
+
+Game.EntityMixins.FoodConsumer = {
+    name: 'FoodConsumer',
+    init: function(template) {
+        this._maxFullness = template['maxFullness'] || 1000;
+        // start halfway to max fullness if no default value
+        this._fullness = template['fullness'] || (this._maxFullness / 2);
+        // number of points to decrease fullness by every turn
+        this._fullnessDepletionRate = template['fullnessDepletionRate'] || 1;
+    },
+    addTurnHunger: function() {
+        // remove the standard depletion points
+        this.modifyFullnessBy(-this._fullnessDepletionRate);
+    },
+    modifyFullnessBy: function(points) {
+        this._fullness = this._fullness + points;
+        if (this._fullness <= 0) {
+            this.kill("You have died of starvation.");
+        } else if (this.fullness > this.maxFullness) {
+            this.kill("You choke and die!");
+        }
+    },
+    getHungerState: function() {
+        // fullness points per percent of max fullness
+        var perPercent = this._maxFullNess / 100;
+        // 5% of max fullness or less = starvign
+        if (this._fullness <= perPercent * 5) {
+            return 'Starving';
+        } else if (this._fullness <= perPercent * 25) {
+            return 'Hungry';
+        } else if (this._fullness >= perPercent * 95) {
+            return 'Oversatiated';
+        } else if (this._fullness >= perPercent * 75) {
+            return 'Full';
+        } else {
+            return 'Not Hungry';
+        }
+    }
+}
