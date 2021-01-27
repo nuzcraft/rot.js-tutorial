@@ -1,9 +1,9 @@
 
 // create our mixins namespace
-Game.Mixins = {};
+Game.EntityMixins = {};
 
 // main player's actor mixin
-Game.Mixins.PlayerActor = {
+Game.EntityMixins.PlayerActor = {
     name: 'PlayerActor',
     groupName: 'Actor',
     act: function() {
@@ -23,7 +23,7 @@ Game.Mixins.PlayerActor = {
     }
 }
 
-Game.Mixins.FungusActor = {
+Game.EntityMixins.FungusActor = {
     name: 'FungusActor',
     groupName: 'Actor',
     init: function(template) {
@@ -70,7 +70,7 @@ Game.Mixins.FungusActor = {
     }
 }
 
-Game.Mixins.WanderActor = {
+Game.EntityMixins.WanderActor = {
     name: 'WanderActor',
     groupName: 'Actor',
     act: function() {
@@ -85,7 +85,7 @@ Game.Mixins.WanderActor = {
     }
 };
 
-Game.Mixins.Destructible = {
+Game.EntityMixins.Destructible = {
     name: 'Destructible',
     init: function(template) {
         this._maxHp = template['maxHp'] || 10;
@@ -109,7 +109,7 @@ Game.Mixins.Destructible = {
         if (this._hp <= 0) {
             Game.sendMessage(attacker, 'You kill the %s!', [this.getName()]);
             // check if the player died, and if so call their act method to prompt the user
-            if (this.hasMixin(Game.Mixins.PlayerActor)) {
+            if (this.hasMixin(Game.EntityMixins.PlayerActor)) {
                 this.act();
             } else {
                 this.getMap().removeEntity(this);
@@ -118,7 +118,7 @@ Game.Mixins.Destructible = {
     }
 }
 
-Game.Mixins.Attacker = {
+Game.EntityMixins.Attacker = {
     name: 'Attacker',
     groupName: 'Attacker',
     init: function(template) {
@@ -144,7 +144,7 @@ Game.Mixins.Attacker = {
     }
 }
 
-Game.Mixins.MessageRecipient = {
+Game.EntityMixins.MessageRecipient = {
     name: 'MessageRecipient',
     init: function(template) {
         this._messages = [];
@@ -161,7 +161,7 @@ Game.Mixins.MessageRecipient = {
 }
 
 // this signifies our entity posseses a field of vision of a given radius
-Game.Mixins.Sight = {
+Game.EntityMixins.Sight = {
     name: 'Sight',
     groupName: 'Sight',
     init: function(template) {
@@ -172,7 +172,7 @@ Game.Mixins.Sight = {
     }
 }
 
-Game.Mixins.InventoryHolder = {
+Game.EntityMixins.InventoryHolder = {
     name: 'InventoryHolder',
     init: function(template) {
         // default to 10 inventory slots
@@ -280,10 +280,10 @@ Game.PlayerTemplate = {
     attackValue: 10,
     sightRadius: 6,
     inventorySlots: 22,
-    mixins: [Game.Mixins.PlayerActor,
-        Game.Mixins.Attacker, Game.Mixins.Destructible,
-        Game.Mixins.InventoryHolder,
-        Game.Mixins.Sight, Game.Mixins.MessageRecipient]
+    mixins: [Game.EntityMixins.PlayerActor,
+        Game.EntityMixins.Attacker, Game.EntityMixins.Destructible,
+        Game.EntityMixins.InventoryHolder,
+        Game.EntityMixins.Sight, Game.EntityMixins.MessageRecipient]
 }
 
 // create our central entity repository
@@ -295,7 +295,7 @@ Game.EntityRepository.define('fungus', {
     foreground: 'green',
     maxHp: 10,
     percentChanceToSpread: 5,
-    mixins: [Game.Mixins.FungusActor, Game.Mixins.Destructible]
+    mixins: [Game.EntityMixins.FungusActor, Game.EntityMixins.Destructible]
 });
 
 Game.EntityRepository.define('red fungus', {
@@ -304,7 +304,7 @@ Game.EntityRepository.define('red fungus', {
     foreground: 'red',
     maxHp: 12,
     percentChanceToSpread: 3,
-    mixins: [Game.Mixins.FungusActor, Game.Mixins.Destructible]
+    mixins: [Game.EntityMixins.FungusActor, Game.EntityMixins.Destructible]
 });
 
 Game.EntityRepository.define('bat', {
@@ -313,8 +313,8 @@ Game.EntityRepository.define('bat', {
     foreground: 'white',
     maxHp: 5,
     attackValue: 4,
-    mixins: [Game.Mixins.WanderActor,
-        Game.Mixins.Attacker, Game.Mixins.Destructible]
+    mixins: [Game.EntityMixins.WanderActor,
+        Game.EntityMixins.Attacker, Game.EntityMixins.Destructible]
 });
 
 Game.EntityRepository.define('newt', {
@@ -323,8 +323,8 @@ Game.EntityRepository.define('newt', {
     foreground: 'yellow',
     maxHp: 3,
     attackValue: 2,
-    mixins: [Game.Mixins.WanderActor,
-        Game.Mixins.Attacker, Game.Mixins.Destructible]
+    mixins: [Game.EntityMixins.WanderActor,
+        Game.EntityMixins.Attacker, Game.EntityMixins.Destructible]
 });
 
 Game.EntityRepository.define('spider', {
@@ -333,6 +333,6 @@ Game.EntityRepository.define('spider', {
     foreground: 'violet',
     maxHp: 4,
     attackValue: 3,
-    mixins: [Game.Mixins.WanderActor,
-        Game.Mixins.Attacker, Game.Mixins.Destructible]
+    mixins: [Game.EntityMixins.WanderActor,
+        Game.EntityMixins.Attacker, Game.EntityMixins.Destructible]
 });

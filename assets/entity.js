@@ -128,8 +128,8 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
     } else if (target) {
         // if we are an attacker, try to attack the target
         if (this.hasMixin('Attacker') &&
-            (this.hasMixin(Game.Mixins.PlayerActor) ||
-            target.hasMixin(Game.Mixins.PlayerActor))) {
+            (this.hasMixin(Game.EntityMixins.PlayerActor) ||
+            target.hasMixin(Game.EntityMixins.PlayerActor))) {
             this.attack(target);
             return true;
         } else {
@@ -153,7 +153,7 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
     // check if the tile is diggable, and if so try to dig it
     } else if (tile.isDiggable()) {
         // only dig if the entity is the player
-        if (this.hasMixin(Game.Mixins.PlayerActor)) {
+        if (this.hasMixin(Game.EntityMixins.PlayerActor)) {
             map.dig(x, y, z);
             return true;
         }
