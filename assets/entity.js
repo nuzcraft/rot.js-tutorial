@@ -39,11 +39,7 @@ Game.Entity = function(properties) {
 }
 
 // make entities inherit all the functionality from glyphs
-Game.Entity.extend(Game.Glyph);
-
-Game.Entity.prototype.setName = function(name) {
-    this._name = name;
-}
+Game.Entity.extend(Game.DynamicGlyph);
 
 Game.Entity.prototype.setX = function(x) {
     this._x = x;
@@ -55,10 +51,6 @@ Game.Entity.prototype.setY = function(y) {
 
 Game.Entity.prototype.setZ = function(z) {
     this._z = z;
-}
-
-Game.Entity.prototype.getName = function() {
-    return this._name;
 }
 
 Game.Entity.prototype.getX = function() {
@@ -79,15 +71,6 @@ Game.Entity.prototype.setMap = function(map) {
 
 Game.Entity.prototype.getMap = function() {
     return this._map;
-}
-
-Game.Entity.prototype.hasMixin = function(obj) {
-    // allow the passing of the mixin itself or the name as a string
-    if (typeof obj === 'object') {
-        return this._attachedMixins[obj.name];
-    } else {
-        return this._attachedMixins[obj] || this._attachedMixinGroups[obj];
-    }
 }
 
 Game.Entity.prototype.setPosition = function(x, y, z) {
