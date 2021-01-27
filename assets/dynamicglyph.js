@@ -1,5 +1,5 @@
 
-Gamepad.DynamicGlyph = function(properties) {
+Game.DynamicGlyph = function(properties) {
     properties = properties || {};
     // call the glyph's constructor with our set of properties
     Game.Glyph.call(this, properties);
