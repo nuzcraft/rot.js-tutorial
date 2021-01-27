@@ -266,7 +266,7 @@ Game.EntityMixins.FoodConsumer = {
     },
     getHungerState: function() {
         // fullness points per percent of max fullness
-        var perPercent = this._maxFullNess / 100;
+        var perPercent = this._maxFullness / 100;
         // 5% of max fullness or less = starvign
         if (this._fullness <= perPercent * 5) {
             return 'Starving';
