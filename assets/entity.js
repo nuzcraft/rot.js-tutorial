@@ -2,7 +2,7 @@
 Game.Entity = function(properties) {
     properties = properties || {};
     // call the glyph's constructor with our set of properties
-    Game.Glyph.call(this, properties);
+    Game.DynamicGlyph.call(this, properties);
     // instantiate any properties from the passed object
     this._name = properties['name'] || '';
     this._x = properties['x'] || 0;
