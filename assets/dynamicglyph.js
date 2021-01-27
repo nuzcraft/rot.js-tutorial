@@ -22,7 +22,7 @@ Game.DynamicGlyph = function(properties) {
             }
         }
         // add the name of this mixin to our attached mixins
-        this._attachedMixins[mixin[i].name] = true;
+        this._attachedMixins[mixins[i].name] = true;
         // if a group name is present, add it
         if (mixins[i].groupName) {
             this._attachedMixinGroups[mixins[i].groupName] = true;
