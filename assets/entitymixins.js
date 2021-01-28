@@ -114,6 +114,10 @@ Game.EntityMixins.Destructible = {
         // if have 0 hp or less, remove ourselves from the map
         if (this._hp <= 0) {
             Game.sendMessage(attacker, 'You kill the %s!', [this.getName()]);
+            // if the entity has a corpse dropper mixin, try to add a corpse
+            if (this.hasMixin(Game.EntityMixins.CorpseDropper)) {
+                this.tryDropCorpse();
+            }
             this.kill();
         }
     }
@@ -281,3 +285,21 @@ Game.EntityMixins.FoodConsumer = {
         }
     }
 }
+
+Game.EntityMixins.CorpseDropper = {
+    name: 'CorpseDropper',
+    init: function(template) {
+        // chance of dropping a corpse (out of 100)
+        this._corpseDropRate = template['corpseDropRate'] || 100;
+    },
+    tryDropCorpse: function() {
+        if (Math.round(Math.random() * 100) < this._corpseDropRate) {
+            // create a new corpse item and drop it
+            this._map.addItem(this.getX(), this.getY(), this.getZ(),
+                Game.ItemRepository.create('corpse', {
+                    name: this._name + ' corpse',
+                    foreground: this._foreground
+                }));
+        }
+    }
+};
