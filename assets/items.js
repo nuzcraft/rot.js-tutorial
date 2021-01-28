@@ -12,7 +12,7 @@ Game.ItemRepository.define('apple', {
 Game.ItemRepository.define('melon', {
     name: 'melon',
     character: '%',
-    foreground: 'brightGreen',
+    foreground: 'limegreen',
     foodValue: 35,
     consumptions: 4,
     mixins: [Game.ItemMixins.Edible]

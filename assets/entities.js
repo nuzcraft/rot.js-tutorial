@@ -71,17 +71,19 @@ Game.EntityRepository.define('bat', {
     maxHp: 5,
     attackValue: 4,
     mixins: [Game.EntityMixins.WanderActor,
-        Game.EntityMixins.Attacker, Game.EntityMixins.Destructible]
+        Game.EntityMixins.Attacker, Game.EntityMixins.Destructible,
+        Game.EntityMixins.CorpseDropper]
 });
 
 Game.EntityRepository.define('newt', {
     name: 'newt',
-    character: ':',
+    character: 'n',
     foreground: 'yellow',
     maxHp: 3,
     attackValue: 2,
     mixins: [Game.EntityMixins.WanderActor,
-        Game.EntityMixins.Attacker, Game.EntityMixins.Destructible]
+        Game.EntityMixins.Attacker, Game.EntityMixins.Destructible,
+        Game.EntityMixins.CorpseDropper]
 });
 
 Game.EntityRepository.define('spider', {
@@ -91,5 +93,6 @@ Game.EntityRepository.define('spider', {
     maxHp: 4,
     attackValue: 3,
     mixins: [Game.EntityMixins.WanderActor,
-        Game.EntityMixins.Attacker, Game.EntityMixins.Destructible]
+        Game.EntityMixins.Attacker, Game.EntityMixins.Destructible,
+        Game.EntityMixins.CorpseDropper]
 });
