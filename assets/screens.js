@@ -383,6 +383,10 @@ Game.Screen.ItemListScreen.prototype.handleInput = function(inputType, inputData
         // handle pressing return when items are selected
         } else if (inputData.keyCode === ROT.KEYS.VK_RETURN) {
             this.executeOkFunction();
+        // handle pressing zero when 'no item' selection is enabled
+        } else if (this._canSelectItem && this._hasNoItemOption && inputData.keyCode === ROT.KEYS.VK_0) {
+            this._selectedIndices = {};
+            this.executeOkFunction();
         // handle pressing return when items are selected
         } else if (this._canSelectItem && inputData.keyCode >= ROT.KEYS.VK_A &&
             inputData.keyCode <= ROT.KEYS.VK_Z) {
@@ -457,4 +461,54 @@ Game.Screen.eatScreen = new Game.Screen.ItemListScreen({
         }
         return true;
     }
-})
+});
+
+Game.Screen.wieldScreen = new Game.Screen.ItemListScreen({
+    caption: 'Choose the item you wish to wield.',
+    canSelect: true,
+    canSelectMultipleItems: false,
+    hasNoItemOption: true,
+    isAcceptable: function(item) {
+        return item && item.hasMixin('Equippable') && item.isWieldable();
+    },
+    ok: function(selectedItems) {
+        // check if we selected 'no item'
+        var keys = Object.keys(selectedItems);
+        if (keys.length === 0) {
+            this._player.unwield();
+            Game.sendMessage(this._player, "You are empty handed.");
+        } else {
+            // make sure to unequip the item first in case it is the armor
+            var item = selectedItems[keys[0]];
+            this._player.unequip(item);
+            this._player.wield(item);
+            Game.SendMessage(this._player, "You are wielding %s.", [item.describeA()]);
+        }
+        return true;
+    }
+});
+
+Game.Screen.wearScreen = new Game.Screen.ItemListScreen({
+    caption: 'Choose the item you wish to wear.',
+    canSelect: true,
+    canSelectMultipleItems: false,
+    hasNoItemOption: true,
+    isAcceptable: function(item) {
+        return item && item.hasMixin('Equippable') && item.isWearable();
+    },
+    ok: function(selectedItems) {
+        // check if we selected 'no item'
+        var keys = Object.keys(selectedItems);
+        if (keys.length === 0) {
+            this._player.unwield();
+            Game.sendMessage(this._player, "You are not wearing anything.");
+        } else {
+            // make sure to unequip the item first in case it is the armor
+            var item = selectedItems[keys[0]];
+            this._player.unequip(item);
+            this._player.wear(item);
+            Game.SendMessage(this._player, "You are wearing %s.", [item.describeA()]);
+        }
+        return true;
+    }
+});
