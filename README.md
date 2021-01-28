@@ -6,6 +6,8 @@ I've not done *any* research to see if the tutorial goes all the way to the end 
 ### 2020.01.27
 Alrighty, today we're going to start on Part 11, adding a hunger system. I'm very interested to see how this goes, as well as how we implement using items.
 
+This ended up being a really cool section with a lot of stuff involved. We added a hunger mechanic that will kill the player if the eat too much or too little. We added the ability to eat certain items and eat items more than once. We added the ability for corpses to drop from slain enemies (which can also be eaten). Very fun section! I can see lots of ways to expand upon these bits.
+
 ### 2020.01.23
 Today I'm going to start on part 10b - Inventory and Item Management. Now that we've added items to the game, it's time for the player to be able to pick them up!
 
