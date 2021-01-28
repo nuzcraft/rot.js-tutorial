@@ -300,6 +300,8 @@ Game.Screen.ItemListScreen = function(template) {
     this._canSelectItem = template['canSelect'];
     // wheter the user can select multiple items
     this._canSelectMultipleItems = template['canSelectMultipleItems'];
+    // whether a 'no item' option should appear
+    this._hasNoItemOption = template['hasNoItemOption'];
 }
 
 Game.Screen.ItemListScreen.prototype.setup = function(player, items) {
@@ -327,6 +329,10 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
     var letters = 'abcdefghijklmnopqrstuvwxyz';
     // rendeer the caption in the top row
     display.drawText(0, 0, this._caption);
+    // render the no item row if enabled
+    if (this._hasNoItemOption) {
+        display.drawText(0, 1, '0 - no item');
+    }
     var row = 0;
     for (var i = 0; i < this._items.length; i++) {
         // if we have an item, we want to render it
@@ -337,9 +343,16 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
             // the letter and the item's name
             var selectionState = (this._canSelectItem && this._canSelectMultipleItems &&
                 this._selectedIndices[i]) ? '+' : '-';
+            // check if the item is worn or wielded
+            var suffix = '';
+            if (this._items[i] === this._player.getArmor()) {
+                suffix = ' (wearing)';
+            } else if (this._items[i] === this._player.getWeapon()) {
+                suffix = ' (wielding)';
+            }
             // render at the correct row and add 2
             display.drawText(0, 2 + row, letter + ' ' + selectionState + ' ' + 
-                this._items[i].describe());
+                this._items[i].describe()) + suffix;
             row++;
         }
     }
