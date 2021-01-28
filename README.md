@@ -3,6 +3,9 @@ Hello! Welcome to my project for learning rot.js. We'll be following this tutori
 http://www.codingcookies.com/2013/04/01/building-a-roguelike-in-javascript-part-1/
 I've not done *any* research to see if the tutorial goes all the way to the end of a finished game, but regardless, we're gonna take a shot!
 
+### 2020.01.28
+Heyo! Today, we start on part 12, the 'weapons and wearables' section. I'm pretty pumped about this. Weapons and armor are some of the coolest things in games.
+
 ### 2020.01.27
 Alrighty, today we're going to start on Part 11, adding a hunger system. I'm very interested to see how this goes, as well as how we implement using items.
 
