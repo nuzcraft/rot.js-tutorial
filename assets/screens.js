@@ -170,49 +170,40 @@ Game.Screen.playScreen = {
                     this.move(0, 1, 0);
                 } else if (inputData.keyCode === ROT.KEYS.VK_I) {
                     // show the inventory
-                    if (Game.Screen.inventoryScreen.setup(this._player, this._player.getItems())) {
-                        this.setSubScreen(Game.Screen.inventoryScreen);
-                    } else {
-                        Game.sendMessage(this._player, "You are not carrying anything!");
-                        Game.refresh();
-                    }
-                    return;
+                    this.showItemsSubScreen(Game.Screen.inventoryScreen, this._player.getItems(),
+                        'You are not carrying anything.');
                 } else if (inputData.keyCode === ROT.KEYS.VK_D) {
                     // show the eat screen
-                    if (Game.Screen.dropScreen.setup(this._player, this._player.getItems())) {
-                        this.setSubScreen(Game.Screen.dropScreen);
-                    } else {
-                        Game.sendMessage(this._player, "You have nothing to drop!");
-                        Game.refresh();
-                    }
-                    return;
+                    this.showItemsSubScreen(Game.Screen.dropScreen, this._player.getItems(),
+                        'You have nothing to drop.');
                 } else if (inputData.keyCode === ROT.KEYS.VK_E) {
                     // show the eat screen
-                    if (Game.Screen.eatScreen.setup(this._player, this._player.getItems())) {
-                        this.setSubScreen(Game.Screen.eatScreen);
+                    this.showItemsSubScreen(Game.Screen.eatScreen, this._player.getItems(),
+                        'You have nothing to eat.');
+                } else if (inputData.keyCode === ROT.KEYS.VK_W) {
+                    if (inputData.shiftKey) {
+                        // show the wear screen
+                        this.showItemsSubScreen(Game.Screen.wearScreen, this._player.getItems(),
+                            'You have nothing to wear.');
                     } else {
-                        Game.sendMessage(this._player, "You have nothing to eat!");
-                        Game.refresh();
+                        // show the wield screen
+                        this.showItemsSubScreen(Game.Screen.wieldScreen, this._player.getItems(),
+                            'You have nothing to wield.');
                     }
                     return;
                 } else if (inputData.keyCode === ROT.KEYS.VK_COMMA) {
                     var items = this._map.getItemsAt(this._player.getX(), this._player.getY(), this._player.getZ());
-                    // if there are no items, show a message
-                    if (!items) {
-                        Game.sendMessage(this._player, "There is nothing here to pick up.");
-                    } else if (items.length === 1) {
-                        // if only one item, try to pick it up
+                    // if there is only one item, directly pick it up
+                    if (items && items.length === 1) {
                         var item = items[0];
                         if (this._player.pickupItems([0])) {
-                            Game.sendMessage(this._player, "You pick up %s", [item.describeA()]);
+                            Game.sendMessage(this._player, "You pick up %s.", [item.describeA()]);
                         } else {
                             Game.sendMessage(this._player, "Your inventory is full! Nothing was picked up.");
                         }
                     } else {
-                        // show the pickup screen if there are any items
-                        Game.Screen.pickupScreen.setup(this._player, items);
-                        this.setSubScreen(Game.Screen.pickupScreen);
-                        return;
+                        this.showItemsSubScreen(Game.Screen.pickupScreen, items,
+                            'There is nothing here to pick up.');
                     }
                 } else {
                     // not a valid key
@@ -242,8 +233,16 @@ Game.Screen.playScreen = {
         this._subScreen = subScreen;
         // refresh screen on changing the subscreen
         Game.refresh();
+    },
+    showItemsSubScreen: function(subScreen, items, emptyMessage) {
+        if (items && subScreen.setup(this._player, items) > 0) {
+            this.setSubScreen(subScreen);
+        } else {
+            Game.sendMessage(this._player, emptyMessage);
+            Game.refresh();
+        }
     }
-}
+};
 
 // Define our winning screen
 Game.Screen.winScreen = {
