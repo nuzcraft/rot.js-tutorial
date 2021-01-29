@@ -351,7 +351,7 @@ Game.Screen.ItemListScreen.prototype.render = function(display) {
             }
             // render at the correct row and add 2
             display.drawText(0, 2 + row, letter + ' ' + selectionState + ' ' + 
-                this._items[i].describe()) + suffix;
+                this._items[i].describe() + suffix);
             row++;
         }
     }

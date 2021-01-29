@@ -6,6 +6,8 @@ I've not done *any* research to see if the tutorial goes all the way to the end 
 ### 2020.01.28
 Heyo! Today, we start on part 12, the 'weapons and wearables' section. I'm pretty pumped about this. Weapons and armor are some of the coolest things in games.
 
+This part went a little slow - I was a bit distracted most of the time. But hey, this opened the doors for a lot of cool stuff we can do with weapons and armors down the line. I really liked that we made items multi-purpose.
+
 ### 2020.01.27
 Alrighty, today we're going to start on Part 11, adding a hunger system. I'm very interested to see how this goes, as well as how we implement using items.
 
