@@ -148,7 +148,7 @@ Game.EntityMixins.Attacker = {
                 modifier += this.getWeapon().getAttackValue();
             }
             if (this.getArmor()) {
-                modifier += this.getArmor.getAttackValue();
+                modifier += this.getArmor().getAttackValue();
             }
         }
         return this._attackValue + modifier;
