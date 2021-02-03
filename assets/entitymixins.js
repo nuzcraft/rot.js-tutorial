@@ -74,21 +74,6 @@ Game.EntityMixins.FungusActor = {
             }
         }
     }
-}
-
-Game.EntityMixins.WanderActor = {
-    name: 'WanderActor',
-    groupName: 'Actor',
-    act: function() {
-        // flip a coin to determin if moving by one in the positive or negative direction
-        var moveOffset = (Math.round(Math.random()) === 1) ? 1 : -1;
-        // flip a coin to determine if moving in x or y direction
-        if (Math.round(Math.random()) === 1) {
-            this.tryMove(this.getX() + moveOffset, this.getY(), this.getZ());
-        } else {
-            this.tryMove(this.getX(), this.getY() + moveOffset, this.getZ());
-        }
-    }
 };
 
 Game.EntityMixins.Destructible = {
@@ -195,8 +180,36 @@ Game.EntityMixins.Sight = {
     },
     getSightRadius: function() {
         return this._sightRadius;
+    },
+    canSee: function(entity) {
+        // if not on the same map or on different floors, then exit early
+        if (!entity || this._map !== entity.getMap() || this._z !== entity.getZ()) {
+            return false;
+        }
+        var otherX = entity.getX();
+        var otherY = entity.getY();
+        // if we're not in a square field of view, then we won't be in a real
+        // field of view either
+        if ((otherX - this._x) * (otherX - this._x) + 
+            (otherY - this._y) * (otherY - this._y) >
+            this._sightRadius * this._sightRadius) {
+            return false;
+        }
+
+        // compute the fov and check the coordinates are in there
+        var found = false;
+        this.getMap().getFov(this.getZ()).compute(
+            this.getX(), this.getY(),
+            this.getSightRadius(),
+            function(x, y, radius, visibility) {
+                if (x === otherX && y === otherY) {
+                    found = true;
+                }
+            }
+        );
+        return found;
     }
-}
+};
 
 Game.EntityMixins.InventoryHolder = {
     name: 'InventoryHolder',
@@ -328,6 +341,73 @@ Game.EntityMixins.CorpseDropper = {
         }
     }
 };
+
+Game.EntityMixins.TaskActor = {
+    name: 'TaskActor',
+    groupName: 'Actor',
+    init: function(template) {
+        // load tasks
+        this._tasks = template['tasks'] || ['wander'];
+    },
+    act: function() {
+        // iterate through all our tasks
+        for (var i = 0; i < this._tasks.length; i++) {
+            if (this.canDoTask(this._tasks[i])) {
+                // if we can perform the task, execute the function for it
+                this[this._tasks[i]]();
+                return;
+            }
+        }
+    },
+    canDoTask: function(task) {
+        if (task === 'hunt') {
+            return this.hasMixin('Sight') && this.canSee(this.getMap().getPlayer());
+        } else if (task === 'wander') {
+            return true;
+        } else {
+            throw new Error('Tried to perform undefined task ' + task);
+        }
+    },
+    hunt: function() {
+        var player = this.getMap().getPlayer();
+        // if we are adjacent to the player, then attack instead of hunting
+        var offsets = Math.abs(player.getX() - this.getX()) + 
+            Math.abs(player.getY() - this.getY());
+        if (offsets === 1) {
+            if (this.hasMixin('Attacker')) {
+                this.attack(player);
+                return;
+            }
+        }
+        // generate the path and move to the first tile
+        var source = this;
+        var z = source.getZ();
+        var path = new ROT.Path.AStar(player.getX(), player.getY(), function(x, y) {
+            // if an entity is present at the tile, can't move there
+            var entity = source.getMap().getEntityAt(x, y, z);
+            if (entity && entity !== player && entity !== source) {
+                return false;
+            }
+            return source.getMap().getTile(x, y, z).isWalkable();
+        }, {topology: 4});
+        // once we've gotten the path, we want to move to the second cell that is
+        // passed in the callback (the first is the entity's starting point)
+        var count = 0;
+        path.compute(source.getX(), source.getY(), function(x, y) {
+            if (count == 1) {
+                source.tryMove(x, y, z);
+            }
+            count++;
+        });
+    },
+    wander: function() {
+        // flip a coin to determine if moving by 1 in the positive or negative direction
+        var moveOffset = (Math.round(Math.random()) === 1) ? 1 : -1;
+        // flip a coin to determine if moving in x direction or y direction
+        if (Math.round(Math.random()) === 1) {
+            this.tryMove(this.getX() + moveOffset, this.getY(), this.getZ());
+        } else {
+            this.tryMove(this.getX(), this.getY() + moveOffset, this.getZ());
 
 Game.EntityMixins.Equipper = {
     name: 'Equipper',
