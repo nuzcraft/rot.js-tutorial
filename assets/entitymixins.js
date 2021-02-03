@@ -408,6 +408,9 @@ Game.EntityMixins.TaskActor = {
             this.tryMove(this.getX() + moveOffset, this.getY(), this.getZ());
         } else {
             this.tryMove(this.getX(), this.getY() + moveOffset, this.getZ());
+        }
+    }
+};
 
 Game.EntityMixins.Equipper = {
     name: 'Equipper',
