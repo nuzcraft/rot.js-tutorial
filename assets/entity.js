@@ -177,4 +177,4 @@ Game.Entity.prototype.setSpeed = function(speed) {
 
 Game.Entity.prototype.getSpeed = function() {
     return this._speed;
-}
+};
