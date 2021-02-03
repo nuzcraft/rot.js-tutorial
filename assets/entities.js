@@ -52,6 +52,7 @@ Game.EntityRepository.define('fungus', {
     foreground: 'green',
     maxHp: 10,
     percentChanceToSpread: 5,
+    speed: 250,
     mixins: [Game.EntityMixins.FungusActor, Game.EntityMixins.Destructible]
 });
 
@@ -61,6 +62,7 @@ Game.EntityRepository.define('red fungus', {
     foreground: 'red',
     maxHp: 12,
     percentChanceToSpread: 3,
+    speed: 250,
     mixins: [Game.EntityMixins.FungusActor, Game.EntityMixins.Destructible]
 });
 
@@ -70,6 +72,7 @@ Game.EntityRepository.define('bat', {
     foreground: 'white',
     maxHp: 5,
     attackValue: 4,
+    speed: 2000,
     mixins: [Game.EntityMixins.WanderActor,
         Game.EntityMixins.Attacker, Game.EntityMixins.Destructible,
         Game.EntityMixins.CorpseDropper]
