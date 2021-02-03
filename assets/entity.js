@@ -37,7 +37,9 @@ Game.Entity = function(properties) {
             mixins[i].init.call(this, properties);
         }
     }
-}
+    // acting speed
+    this._speed = properties['speed'] || 1000;
+};
 
 // make entities inherit all the functionality from glyphs
 Game.Entity.extend(Game.DynamicGlyph);
@@ -168,3 +170,11 @@ Game.Entity.prototype.kill = function(message) {
         this.getMap().removeEntity(this);
     }
 };
+
+Game.Entity.prototype.setSpeed = function(speed) {
+    this._speed = speed;
+};
+
+Game.Entity.prototype.getSpeed = function() {
+    return this._speed;
+}
