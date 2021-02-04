@@ -91,6 +91,9 @@ Game.EntityMixins.Destructible = {
     getMaxHp: function() {
         return this._maxHp;
     },
+    setHp: function(hp) {
+        this._hp = hp;
+    },
     getDefenseValue: function() {
         var modifier = 0;
         // take into account defense values from weapons and armor
@@ -115,6 +118,21 @@ Game.EntityMixins.Destructible = {
             }
             this.kill();
         }
+    },
+    increaseDefenseValue: function(value) {
+        // if no value was passed, default to 2
+        value = value || 2;
+        // add to the defense value
+        this._defenseValue += value;
+        Game.sendMessage(this, "You look tougher!");
+    },
+    increaseMaxHp: function(value) {
+        // if no value was passed, default to 10
+        value = value || 10;
+        // add to both max HP and HP
+        this._maxHp += value;
+        this._hp += value;
+        Game.sendMessage(this, "You look healthier!");
     }
 }
 
@@ -137,6 +155,13 @@ Game.EntityMixins.Attacker = {
             }
         }
         return this._attackValue + modifier;
+    },
+    increaseAttackValue: function(value) {
+        // if no value was passed, default to 2
+        value = value || 2;
+        // add to the attack value
+        this._attackValue += value;
+        Game.sendMessage(this, "You look stronger!");
     },
     attack: function(target) {
         // only remove the entity if they were attackable
@@ -208,6 +233,13 @@ Game.EntityMixins.Sight = {
             }
         );
         return found;
+    },
+    increasesSightRadius: function(value) {
+        // if no value was passed, default to 1
+        value = value || 1;
+        // add to sight radius
+        this._sightRadius += value;
+        Game.sendMessage(this, "You are more aware of your surroundings!");
     }
 };
 
