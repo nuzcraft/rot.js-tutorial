@@ -364,7 +364,7 @@ Game.EntityMixins.CorpseDropper = {
     listeners: {
         onDeath: function(attacker) {
             // check if we should drop a corpse
-            if (Math.round(Math.random() * 100 <= this._corpseDropRate) {
+            if (Math.round(Math.random() * 100) <= this._corpseDropRate) {
                 // create a new corpse item and drop it
                 this._map.addItem(this.getX(), this.getY(), this.getZ(),
                     Game.ItemRepository.create('corpse', {
