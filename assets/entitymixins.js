@@ -132,8 +132,14 @@ Game.EntityMixins.Destructible = {
         this._maxHp += value;
         this._hp += value;
         Game.sendMessage(this, "You look healthier!");
+    },
+    listeners: {
+        onGainLevel: function() {
+            // heal the entity
+            this.setHp(this.getMaxHp());
+        }
     }
-}
+};
 
 Game.EntityMixins.Attacker = {
     name: 'Attacker',
@@ -544,13 +550,7 @@ Game.EntityMixins.ExperienceGainer = {
         // check if we gained at least one level
         if (levelsGained > 0) {
             Game.sendMessage(this, "You advance to level %d.", [this._level]);
-            // heal the entity if possible
-            if (this.hasMixin('Destructible')) {
-                this.setHp(this.getMaxHp());
-            }
-            if (this.hasMixin('StatGainer')) {
-                this.onGainLevel();
-            }
+            this.raiseEvent('onGainLevel');
         }
     },
     listeners: {
@@ -574,14 +574,16 @@ Game.EntityMixins.ExperienceGainer = {
 Game.EntityMixins.RandomStatGainer = {
     name: 'RandomStatGainer',
     groupName: 'StatGainer',
-    onGainLevel: function() {
-        var statOptions = this.getStatOptions();
-        // randomly select a stat option and execute the callback for each
-        // stat point
-        while (this.getStatPoints() > 0) {
-            // call the stat increasing function with this as the context
-            statOptions.random()[1].call(this);
-            this.setStatPoints(this.getStatPoints() - 1);
+    listeners: {
+        onGainLevel: function() {
+            var statOptions = this.getStatOptions();
+            // randomly select a stat option and execute the callback for each
+            // stat point
+            while (this.getStatPoints() > 0) {
+                // call the stat increasing function with this as the context
+                statOptions.random()[1].call(this);
+                this.setStatPoints(this.getStatPoints() - 1);
+            }
         }
     }
 };
@@ -589,9 +591,11 @@ Game.EntityMixins.RandomStatGainer = {
 Game.EntityMixins.PlayerStatGainer = {
     name: 'PlayerStatGainer',
     groupName: 'StatGainer',
-    onGainLevel: function() {
-        // setup the gain stat screen and show it
-        Game.Screen.gainStatScreen.setup(this);
-        Game.Screen.playScreen.setSubScreen(Game.Screen.gainStatScreen);
+    listeners: {
+        onGainLevel: function() {
+            // setup the gain stat screen and show it
+            Game.Screen.gainStatScreen.setup(this);
+            Game.Screen.playScreen.setSubScreen(Game.Screen.gainStatScreen);
+        }
     }
 };
