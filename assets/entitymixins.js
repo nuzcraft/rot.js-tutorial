@@ -549,4 +549,29 @@ Game.EntityMixins.ExperienceGainer = {
             // TODO: Actually increase stats
         }
     }
-}
+};
+
+Game.EntityMixins.RandomStatGainer = {
+    name: 'RandomStatGainer',
+    groupName: 'StatGainer',
+    onGainLevel: function() {
+        var statOptions = this.getStatOptions();
+        // randomly select a stat option and execute the callback for each
+        // stat point
+        while (this.getStatPoints() > 0) {
+            // call the stat increasing function with this as the context
+            statOptions.random()[1].call(this);
+            this.setStatPoints(this.getStatPoints() - 1);
+        }
+    }
+};
+
+Game.EntityMixins.PlayerStatGainer = {
+    name: 'PlayerStatGainer',
+    groupName: 'StatGainer',
+    onGainLevel: function() {
+        // setup the gain stat screen and show it
+        Game.Screen.gainStatScreen.setup(this);
+        Game.Screen.playScreen.setSubScreen(Game.Screen.gainStatScreen);
+    }
+};
