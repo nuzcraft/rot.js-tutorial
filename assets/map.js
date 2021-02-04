@@ -24,7 +24,15 @@ Game.Map = function(tiles, player) {
         // 15 entities per floor
         for (var i = 0; i < 15; i++) {
             // add a random entity
-            this.addEntityAtRandomPosition(Game.EntityRepository.createRandom(), z);
+            var entity = Game.EntityRepository.createRandom();
+            this.addEntityAtRandomPosition(entity, z);
+            // level up the entity based on the floor
+            if (entity.hasMixin('ExperienceGainer')) {
+                for (var level = 0; level < z; level++) {
+                    entity.giveExperience(entity.getNextLevelExperience() -
+                        entity.getExperience())
+                }
+            }
         }
         // 10 items per floor
         for (var i = 0; i < 10; i++) {

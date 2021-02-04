@@ -41,7 +41,8 @@ Game.PlayerTemplate = {
         Game.EntityMixins.Attacker, Game.EntityMixins.Destructible,
         Game.EntityMixins.InventoryHolder, Game.EntityMixins.FoodConsumer,
         Game.EntityMixins.Sight, Game.EntityMixins.MessageRecipient,
-        Game.EntityMixins.Equipper]
+        Game.EntityMixins.Equipper,
+        Game.EntityMixins.ExperienceGainer, Game.EntityMixins.PlayerStatGainer]
 }
 
 // create our central entity repository
@@ -54,7 +55,8 @@ Game.EntityRepository.define('fungus', {
     maxHp: 10,
     percentChanceToSpread: 5,
     speed: 250,
-    mixins: [Game.EntityMixins.FungusActor, Game.EntityMixins.Destructible]
+    mixins: [Game.EntityMixins.FungusActor, Game.EntityMixins.Destructible,
+        Game.EntityMixins.ExperienceGainer, Game.EntityMixins.RandomStatGainer]
 });
 
 Game.EntityRepository.define('red fungus', {
@@ -64,7 +66,8 @@ Game.EntityRepository.define('red fungus', {
     maxHp: 12,
     percentChanceToSpread: 3,
     speed: 250,
-    mixins: [Game.EntityMixins.FungusActor, Game.EntityMixins.Destructible]
+    mixins: [Game.EntityMixins.FungusActor, Game.EntityMixins.Destructible,
+        Game.EntityMixins.ExperienceGainer, Game.EntityMixins.RandomStatGainer]
 });
 
 Game.EntityRepository.define('bat', {
@@ -76,7 +79,8 @@ Game.EntityRepository.define('bat', {
     speed: 2000,
     mixins: [Game.EntityMixins.TaskActor,
         Game.EntityMixins.Attacker, Game.EntityMixins.Destructible,
-        Game.EntityMixins.CorpseDropper]
+        Game.EntityMixins.CorpseDropper,
+        Game.EntityMixins.ExperienceGainer, Game.EntityMixins.RandomStatGainer]
 });
 
 Game.EntityRepository.define('newt', {
@@ -87,7 +91,8 @@ Game.EntityRepository.define('newt', {
     attackValue: 2,
     mixins: [Game.EntityMixins.TaskActor,
         Game.EntityMixins.Attacker, Game.EntityMixins.Destructible,
-        Game.EntityMixins.CorpseDropper]
+        Game.EntityMixins.CorpseDropper,
+        Game.EntityMixins.ExperienceGainer, Game.EntityMixins.RandomStatGainer]
 });
 
 Game.EntityRepository.define('spider', {
@@ -98,7 +103,8 @@ Game.EntityRepository.define('spider', {
     attackValue: 3,
     mixins: [Game.EntityMixins.TaskActor,
         Game.EntityMixins.Attacker, Game.EntityMixins.Destructible,
-        Game.EntityMixins.CorpseDropper]
+        Game.EntityMixins.CorpseDropper,
+        Game.EntityMixins.ExperienceGainer, Game.EntityMixins.RandomStatGainer]
 });
 
 Game.EntityRepository.define('kobold', {
@@ -111,5 +117,6 @@ Game.EntityRepository.define('kobold', {
     tasks: ['hunt', 'wander'],
     mixins: [Game.EntityMixins.TaskActor, Game.EntityMixins.Sight,
         Game.EntityMixins.Attacker, Game.EntityMixins.Destructible,
-        Game.EntityMixins.CorpseDropper]
+        Game.EntityMixins.CorpseDropper,
+        Game.EntityMixins.ExperienceGainer, Game.EntityMixins.RandomStatGainer]
 });

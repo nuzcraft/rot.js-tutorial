@@ -91,6 +91,9 @@ Game.EntityMixins.Destructible = {
     getMaxHp: function() {
         return this._maxHp;
     },
+    setHp: function(hp) {
+        this._hp = hp;
+    },
     getDefenseValue: function() {
         var modifier = 0;
         // take into account defense values from weapons and armor
@@ -99,7 +102,7 @@ Game.EntityMixins.Destructible = {
                 modifier += this.getWeapon().getDefenseValue();
             }
             if (this.getArmor()) {
-                modifier += this.getArmor.getDefenseValue();
+                modifier += this.getArmor().getDefenseValue();
             }
         }
         return this._defenseValue + modifier;
@@ -114,7 +117,37 @@ Game.EntityMixins.Destructible = {
                 this.tryDropCorpse();
             }
             this.kill();
+            // give the attacker experience points
+            if (attacker.hasMixin('ExperienceGainer')) {
+                var exp = this.getMaxHp() + this.getDefenseValue();
+                if (this.hasMixin('Attacker')) {
+                    exp += this.getAttackValue();
+                }
+                // account for level differences
+                if (this.hasMixin('ExperienceGainer')) {
+                    exp -= (attacker.getLevel() - this.getLevel()) * 3;
+                }
+                // only give experience if more than 0
+                if (exp > 0) {
+                    attacker.giveExperience(exp);
+                }
+            }
         }
+    },
+    increaseDefenseValue: function(value) {
+        // if no value was passed, default to 2
+        value = value || 2;
+        // add to the defense value
+        this._defenseValue += value;
+        Game.sendMessage(this, "You look tougher!");
+    },
+    increaseMaxHp: function(value) {
+        // if no value was passed, default to 10
+        value = value || 10;
+        // add to both max HP and HP
+        this._maxHp += value;
+        this._hp += value;
+        Game.sendMessage(this, "You look healthier!");
     }
 }
 
@@ -137,6 +170,13 @@ Game.EntityMixins.Attacker = {
             }
         }
         return this._attackValue + modifier;
+    },
+    increaseAttackValue: function(value) {
+        // if no value was passed, default to 2
+        value = value || 2;
+        // add to the attack value
+        this._attackValue += value;
+        Game.sendMessage(this, "You look stronger!");
     },
     attack: function(target) {
         // only remove the entity if they were attackable
@@ -208,6 +248,13 @@ Game.EntityMixins.Sight = {
             }
         );
         return found;
+    },
+    increasesSightRadius: function(value) {
+        // if no value was passed, default to 1
+        value = value || 1;
+        // add to sight radius
+        this._sightRadius += value;
+        Game.sendMessage(this, "You are more aware of your surroundings!");
     }
 };
 
@@ -444,5 +491,104 @@ Game.EntityMixins.Equipper = {
         if (this._armor === item) {
             this.takeOff();
         }
+    }
+};
+
+Game.EntityMixins.ExperienceGainer = {
+    name: 'ExperienceGainer',
+    init: function(template) {
+        this._level = template['level'] || 1;
+        this._experience = template['experience'] || 0;
+        this._statPointsPerLevel = template['statPointsPerLevel'] || 1;
+        this._statPoints = 0;
+        // determine what stats can be leveled up
+        this._statOptions = [];
+        if (this.hasMixin('Attacker')) {
+            this._statOptions.push(['Increase attack value', this.increaseAttackValue]);
+        }
+        if (this.hasMixin('Destructible')) {
+            this._statOptions.push(['Increase defense value', this.increaseDefenseValue]);
+            this._statOptions.push(['Increase max health', this.increaseMaxHp]);
+        }
+        if (this.hasMixin('Sight')) {
+            this._statOptions.push(['Increase sight range', this.increasesSightRadius]);
+        }
+    },
+    getLevel: function() {
+        return this._level;
+    },
+    getExperience: function() {
+        return this._experience;
+    },
+    getNextLevelExperience: function() {
+        return (this._level * this._level) * 10;
+    },
+    getStatPoints: function() {
+        return this._statPoints;
+    },
+    setStatPoints: function(statPoints) {
+        this._statPoints = statPoints;
+    },
+    getStatOptions: function() {
+        return this._statOptions;
+    },
+    giveExperience: function(points) {
+        var statPointsGained = 0;
+        var levelsGained = 0;
+        // loop until we've allocated all points
+        while (points > 0) {
+            // check if adding points will surpass the level threshold
+            if (this._experience + points >= this.getNextLevelExperience()) {
+                // Fill our experienc till the next threshold
+                var usedPoints = this.getNextLevelExperience() - this._experience;
+                points -= usedPoints;
+                this._experience += usedPoints;
+                // level up our entity
+                this._level++;
+                levelsGained++;
+                this._statPoints += this._statPointsPerLevel;
+                statPointsGained += this._statPointsPerLevel;
+            } else {
+                // simple case - just give the experience
+                this._experience += points;
+                points = 0;
+            }
+        }
+        // check if we gained at least one level
+        if (levelsGained > 0) {
+            Game.sendMessage(this, "You advance to level %d.", [this._level]);
+            // heal the entity if possible
+            if (this.hasMixin('Destructible')) {
+                this.setHp(this.getMaxHp());
+            }
+            if (this.hasMixin('StatGainer')) {
+                this.onGainLevel();
+            }
+        }
+    }
+};
+
+Game.EntityMixins.RandomStatGainer = {
+    name: 'RandomStatGainer',
+    groupName: 'StatGainer',
+    onGainLevel: function() {
+        var statOptions = this.getStatOptions();
+        // randomly select a stat option and execute the callback for each
+        // stat point
+        while (this.getStatPoints() > 0) {
+            // call the stat increasing function with this as the context
+            statOptions.random()[1].call(this);
+            this.setStatPoints(this.getStatPoints() - 1);
+        }
+    }
+};
+
+Game.EntityMixins.PlayerStatGainer = {
+    name: 'PlayerStatGainer',
+    groupName: 'StatGainer',
+    onGainLevel: function() {
+        // setup the gain stat screen and show it
+        Game.Screen.gainStatScreen.setup(this);
+        Game.Screen.playScreen.setSubScreen(Game.Screen.gainStatScreen);
     }
 };

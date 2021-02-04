@@ -131,7 +131,9 @@ Game.Screen.playScreen = {
         }
         // render player hp
         var stats = '%c{white}%b{black}';
-        stats += vsprintf('HP: %d/%d ', [this._player.getHp(), this._player.getMaxHp()]);
+        stats += vsprintf('HP: %d/%d L: %d XP: %d',
+            [this._player.getHp(), this._player.getMaxHp(),
+            this._player.getLevel(), this._player.getExperience()]);
         display.drawText(0, screenHeight, stats);
         // render hunger state
         var hungerState = this._player.getHungerState();
@@ -506,8 +508,52 @@ Game.Screen.wearScreen = new Game.Screen.ItemListScreen({
             var item = selectedItems[keys[0]];
             this._player.unequip(item);
             this._player.wear(item);
-            Game.SendMessage(this._player, "You are wearing %s.", [item.describeA()]);
+            Game.sendMessage(this._player, "You are wearing %s.", [item.describeA()]);
         }
         return true;
     }
 });
+
+Game.Screen.gainStatScreen = {
+    setup: function(entity) {
+        // must be called before rendering
+        this._entity = entity;
+        this._options = entity.getStatOptions();
+    },
+    render: function(display) {
+        var letters = 'abcdefghijklmnopqrstuvwxyz';
+        display.drawText(0, 0, 'Choose a stat to increase: ');
+
+        // iterate through each of our options
+        for (var i = 0; i < this._options.length; i++) {
+            display.drawText(0, 2 + i,
+                letters.substring(i, i + 1) + ' - ' + this._options[i][0]);
+        }
+
+        // render remaining stat points
+        display.drawText(0, 4 + this._options.length,
+            "Remaining points: " + this._entity.getStatPoints());
+    },
+    handleInput: function(inputType, inputData) {
+        if (inputType === 'keydown') {
+            // if a letter was pressed, check if ti matches to a valid option
+            if (inputData.keyCode >= ROT.KEYS.VK_A && inputData.keyCode <= ROT.KEYS.VK_Z) {
+                // check if it maps to a valid item by subtracting 'a' from the character
+                // to know what letter of the alphabet we used
+                var index = inputData.keyCode - ROT.KEYS.VK_A;
+                if (this._options[index]) {
+                    // call the stat increasing function
+                    this._options[index][1].call(this._entity);
+                    // decrease stat points
+                    this._entity.setStatPoints(this._entity.getStatPoints() - 1);
+                    // if we have no stat points left, exit the screen, else refresh
+                    if (this._entity.getStatPoints() == 0) {
+                        Game.Screen.playScreen.setSubScreen(undefined);
+                    } else {
+                        Game.refresh();
+                    }
+                }
+            }
+        }
+    }
+};
