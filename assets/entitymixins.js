@@ -102,7 +102,7 @@ Game.EntityMixins.Destructible = {
                 modifier += this.getWeapon().getDefenseValue();
             }
             if (this.getArmor()) {
-                modifier += this.getArmor.getDefenseValue();
+                modifier += this.getArmor().getDefenseValue();
             }
         }
         return this._defenseValue + modifier;
@@ -533,7 +533,7 @@ Game.EntityMixins.ExperienceGainer = {
         return this._statOptions;
     },
     giveExperience: function(points) {
-        var statPointGained = 0;
+        var statPointsGained = 0;
         var levelsGained = 0;
         // loop until we've allocated all points
         while (points > 0) {

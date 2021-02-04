@@ -506,7 +506,7 @@ Game.Screen.wearScreen = new Game.Screen.ItemListScreen({
             var item = selectedItems[keys[0]];
             this._player.unequip(item);
             this._player.wear(item);
-            Game.SendMessage(this._player, "You are wearing %s.", [item.describeA()]);
+            Game.sendMessage(this._player, "You are wearing %s.", [item.describeA()]);
         }
         return true;
     }
