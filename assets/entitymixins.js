@@ -538,9 +538,9 @@ Game.EntityMixins.ExperienceGainer = {
         // loop until we've allocated all points
         while (points > 0) {
             // check if adding points will surpass the level threshold
-            if (this._experience + points > this.getNextLevelExperience()) {
+            if (this._experience + points >= this.getNextLevelExperience()) {
                 // Fill our experienc till the next threshold
-                var usedPoints = this.getNextLevelExperience() - this.experience;
+                var usedPoints = this.getNextLevelExperience() - this._experience;
                 points -= usedPoints;
                 this._experience += usedPoints;
                 // level up our entity

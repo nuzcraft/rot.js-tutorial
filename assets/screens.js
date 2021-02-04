@@ -131,7 +131,9 @@ Game.Screen.playScreen = {
         }
         // render player hp
         var stats = '%c{white}%b{black}';
-        stats += vsprintf('HP: %d/%d ', [this._player.getHp(), this._player.getMaxHp()]);
+        stats += vsprintf('HP: %d/%d L: %d XP: %d',
+            [this._player.getHp(), this._player.getMaxHp(),
+            this._player.getLevel(), this._player.getExperience()]);
         display.drawText(0, screenHeight, stats);
         // render hunger state
         var hungerState = this._player.getHungerState();
