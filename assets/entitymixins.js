@@ -117,6 +117,21 @@ Game.EntityMixins.Destructible = {
                 this.tryDropCorpse();
             }
             this.kill();
+            // give the attacker experience points
+            if (attacker.hasMixin('ExperienceGainer')) {
+                var exp = this.getMaxHp() + this.getDefenseValue();
+                if (this.hasMixin('Attacker')) {
+                    exp += this.getAttackValue();
+                }
+                // account for level differences
+                if (this.hasMixin('ExperienceGainer')) {
+                    exp -= (attacker.getLevel() - this.getLevel()) * 3;
+                }
+                // only give experience if more than 0
+                if (exp > 0) {
+                    attacker.giveExperience(exp);
+                }
+            }
         }
     },
     increaseDefenseValue: function(value) {
@@ -546,7 +561,9 @@ Game.EntityMixins.ExperienceGainer = {
             if (this.hasMixin('Destructible')) {
                 this.setHp(this.getMaxHp());
             }
-            // TODO: Actually increase stats
+            if (this.hasMixin('StatGainer')) {
+                this.onGainLevel();
+            }
         }
     }
 };
