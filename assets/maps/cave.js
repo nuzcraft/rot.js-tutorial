@@ -33,7 +33,7 @@ Game.Map.Cave = function(tiles, player) {
     }
     // add a hole to the final cavern on the last level
     var holePosition = this.getRandomFloorPosition(this._depth - 1);
-    this._tiles[this.depth - 1][holePosition.x][holePosition.y] = 
+    this._tiles[this._depth - 1][holePosition.x][holePosition.y] = 
         Game.Tile.holeToCavernTile;
 };
 
