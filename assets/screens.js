@@ -154,7 +154,7 @@ Game.Screen.playScreen = {
                 }
             }
         };
-    }
+    },
     handleInput: function(inputType, inputData) {
         // if the game is over, enter will bring the user to the losing screen.
         if (this._gameEnded) {
@@ -233,6 +233,18 @@ Game.Screen.playScreen = {
                 this.move(0, 0, 1);
             } else if (keyChar === '<') {
                 this.move(0, 0, -1);
+            } else if (keyChar === ';') {
+                // setup the look screen
+                var offsets = this.getScreenOffsets();
+                Game.Screen.lookScreen.setup(this._player,
+                        this._player.getX(), this._player.getY(),
+                        offsets.x, offsets.y);
+                this.setSubScreen(Game.Screen.lookScreen);
+                return;
+            } else if (keyChar === '?') {
+                // setup the help screen
+                this.setSubScreen(Game.Screen.helpScreen);
+                return;
             } else {
                 // not a valid key
                 return;
