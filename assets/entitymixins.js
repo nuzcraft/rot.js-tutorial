@@ -599,3 +599,57 @@ Game.EntityMixins.PlayerStatGainer = {
         }
     }
 };
+
+Game.EntityMixins.GiantZombieActor = Game.extend(Game.EntityMixins.TaskActor, {
+    init: function(template) {
+        // call the task actor init with the right tasks
+        Game.EntityMixins.TaskActor.init.call(this, Game.extend(template, {
+            'tasks' : ['growArm', 'spawnSlime', 'hunt', 'wander']
+        }));
+        // we only want to grow the arm once
+        this._hasGrownArm = false;
+    },
+    canDoTask: function(task) {
+        // if we haven't already grown arm and HP <= 20, then we can grow
+        if (task === 'growArm') {
+            return this.getHp() <= 20 && !this._hasGrownArm;
+        // spawn a slime only a 10% of turns
+        } else if (task === 'spawnSlime') {
+            return Math.round(Math.random() * 100) <= 10;
+        // call parent canDoTask
+        } else {
+            return Game.EntityMixins.TaskActor.canDoTask.call(this, task);
+        }
+    },
+    growArm: function() {
+        this._hasGrownArm = true;
+        this.increaseAttackValue(5);
+        // send a message saying the zombie grew an arm
+        Game.sendMessageNearby(this.getMap(),
+            this.getX(), this.getY(), this.getZ(),
+            'An extra arm appears on the giant zombie!');
+    },
+    spawnSlime: function() {
+        //generate a random position nearby
+        var xOffset = Math.floor(Math.random() * 3) - 1;
+        var yOffset = Math.floor(Math.random() * 3) - 1;
+        // check if we can spawn an entity at that position
+        if (!this.getMap().isEmptyFloor(this.getX() + xOffset, this.getY() + yOffset,
+            this.getZ())) {
+            // if we can't, do nothing
+            return;
+        }
+        // create the entity
+        var slime = Game.EntityRepository.create('slime');
+        slime.setX(this.getX() + xOffset);
+        slime.setY(this.getY() + yOffset);
+        slime.setZ(this.getZ());
+        this.getMap().addEntity(slime);
+    },
+    listeners: {
+        onDeath: function(attacker) {
+            // switch to win screen when killed
+            Game.switchScreen(Game.Screen.winScreen);
+        }
+    }
+});
