@@ -612,7 +612,7 @@ Game.Screen.TargetBasedScreen = function(template) {
     };
     // the default caption function simply returns an empty string
     this._captionFunction = template['captionFunction'] || function(x, y) {
-        return '',
+        return '';
     };
 };
 
@@ -644,8 +644,9 @@ Game.Screen.TargetBasedScreen.prototype.render = function(display) {
     Game.Screen.playScreen.renderTiles.call(Game.Screen.playScreen, display);
 
     // draw a line from the start to the cursor
-    var points = Game.Geometry.getLine(this._startX, this._startY, this.cursorX,
-        this.cursorY);
+    var points = Game.Geometry.getLine(this._startX, this._startY, this._cursorX,
+        this._cursorY);
+    console.log(points);
 
     // render stars along the line
     for (var i = 0, l = points.length; i < l; i++) {
@@ -661,7 +662,7 @@ Game.Screen.TargetBasedScreen.prototype.handleInput = function(inputType, inputD
     // move the cursor
     if (inputType == 'keydown'){
         if (inputData.keyCode === ROT.KEYS.VK_LEFT) {
-            this,moveCursor(-1, 0);
+            this.moveCursor(-1, 0);
         } else if (inputData.keyCode === ROT.KEYS.VK_RIGHT) {
             this.moveCursor(1, 0);
         } else if (inputData.keyCode === ROT.KEYS.VK_UP) {
@@ -679,12 +680,13 @@ Game.Screen.TargetBasedScreen.prototype.handleInput = function(inputType, inputD
 
 Game.Screen.TargetBasedScreen.prototype.moveCursor = function(dx, dy) {
     // make sure we stay within the bounds
-    this._cursorX = Matph.max(0, Math.min(this._cursorX + dx, Game.getScreenWidth()));
+    this._cursorX = Math.max(0, Math.min(this._cursorX + dx, Game.getScreenWidth()));
     // we have to save the last line for the caption
     this._cursorY = Math.max(0, Math.min(this._cursorY + dy, Game.getScreenWidth() - 1));
+    console.log(this._cursorX, this._cursorY);
 };
 
-Game.Screen.TargetBassedScreen.prototype.executeOkFunction = function() {
+Game.Screen.TargetBasedScreen.prototype.executeOkFunction = function() {
     // switch back to the play screen
     Game.Screen.playScreen.setSubScreen(undefined);
     // call the OK function and end the player's turn if it returns true
@@ -705,7 +707,7 @@ Game.Screen.lookScreen = new Game.Screen.TargetBasedScreen({
                 var items = map.getItemsAt(x, y, z);
                 // if we have items, we want to render the top most item
                 if (items) {
-                    var item = items[item.length - 1];
+                    var item = items[items.length - 1];
                     return String.format('%s - %s (%s)',
                         item.getRepresentation(),
                         item.describeA(true),

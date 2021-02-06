@@ -8,6 +8,7 @@ Game.Tile = function(properties) {
     this._diggable = properties['diggable'] || false;
     this._blocksLight = (properties['blocksLight'] !== undefined) ?
         properties['blocksLight']: true;
+    this._description = properties['description'] || '';
 };
 
 // make the tile inherit the functionality from glyphs
@@ -26,7 +27,11 @@ Game.Tile.prototype.isBlockingLight = function() {
     return this._blocksLight;
 }
 
-Game.Tile.nullTile = new Game.Tile({});
+Game.Tile.prototype.getDescription = function() {
+    return this._description;
+}
+
+Game.Tile.nullTile = new Game.Tile({description: '(unkonwn)'});
 Game.Tile.floorTile = new Game.Tile({
     character: '.',
     walkable: true,

@@ -2,7 +2,7 @@
 Game.Geometry = {
     getLine: function(startX, startY, endX, endY) {
         var points = [];
-        var dx = Math.abs(endX = startX);
+        var dx = Math.abs(endX - startX);
         var dy = Math.abs(endY - startY);
         var sx = (startX < endX) ? 1 : -1;
         var sy = (startY < endY) ? 1 : -1;
