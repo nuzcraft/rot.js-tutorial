@@ -59,14 +59,51 @@ Game.Screen.playScreen = {
         };
         var screenWidth = Game.getScreenWidth();
         var screenHeight = Game.getScreenHeight();
+
+        // render the tiles
+        this.renderTiles(display);
+        
+        // get the messages in the player's queue and render them
+        var messages = this._player.getMessages();
+        var messageY = 0;
+        for (var i = 0; i < messages.length; i++) {
+            // draw each message, adding the number of lines
+            messageY += display.drawText(
+                0,
+                messageY,
+                '%c{white}%b{black}' + messages[i]
+            );
+        }
+        // render player hp
+        var stats = '%c{white}%b{black}';
+        stats += vsprintf('HP: %d/%d L: %d XP: %d',
+            [this._player.getHp(), this._player.getMaxHp(),
+            this._player.getLevel(), this._player.getExperience()]);
+        display.drawText(0, screenHeight, stats);
+        // render hunger state
+        var hungerState = this._player.getHungerState();
+        display.drawText(screenWidth - hungerState.length, screenHeight, hungerState);
+    },
+    getScreenOffsets: function() {
         // make sure the x axis doesn't go to the left of the left bound
-        var topLeftX = Math.max(0, this._player.getX() - (screenWidth / 2));
+        var topLeftX = Math.max(0, this._player.getX() - (Game.getScreenWidth() / 2));
         // make sure we still have enough space to fit an entire game screen
-        topLeftX = Math.min(topLeftX, this._player.getMap().getWidth() - screenWidth);
+        topLeftX = Math.min(topLeftX, this._player.getMap().getWidth() - Game.getScreenWidth());
         // make sure the y axis doesn't go above the top bound
-        var topLeftY = Math.max(0, this._player.getY() - (screenHeight / 2));
+        var topLeftY = Math.max(0, this._player.getY() - (Game.getScreenHeight() / 2));
         // make sure we still have enough space to fit an entire game screen
-        topLeftY = Math.min(topLeftY, this._player.getMap().getHeight() - screenHeight);
+        topLeftY = Math.min(topLeftY, this._player.getMap().getHeight() - Game.getScreenHeight());
+        return {
+            x: topLeftX,
+            y: topLeftY
+        }
+    },
+    renderTiles: function(display) {
+        var screenWidth = Game.getScreenWidth();
+        var screenHeight = Game.getScreenHeight();
+        var offsets = this.getScreenOffsets()
+        var topLeftX = offsets.x;
+        var topLeftY = offsets.y;
         // this object will keep track of all visible map cells
         var visibleCells = {};
         var map = this._player.getMap();
@@ -117,26 +154,6 @@ Game.Screen.playScreen = {
                 }
             }
         };
-        // get the messages in the player's queue and render them
-        var messages = this._player.getMessages();
-        var messageY = 0;
-        for (var i = 0; i < messages.length; i++) {
-            // draw each message, adding the number of lines
-            messageY += display.drawText(
-                0,
-                messageY,
-                '%c{white}%b{black}' + messages[i]
-            );
-        }
-        // render player hp
-        var stats = '%c{white}%b{black}';
-        stats += vsprintf('HP: %d/%d L: %d XP: %d',
-            [this._player.getHp(), this._player.getMaxHp(),
-            this._player.getLevel(), this._player.getExperience()]);
-        display.drawText(0, screenHeight, stats);
-        // render hunger state
-        var hungerState = this._player.getHungerState();
-        display.drawText(screenWidth - hungerState.length, screenHeight, hungerState);
     },
     handleInput: function(inputType, inputData) {
         // if the game is over, enter will bring the user to the losing screen.
@@ -153,72 +170,81 @@ Game.Screen.playScreen = {
             return;
         };
         if (inputType === 'keydown') {
-            // if enter is pressed, go to the win screen
-            // if escape is pressed, go to the lose screen
-            if (inputData.keyCode === ROT.KEYS.VK_RETURN) {
-                Game.switchScreen(Game.Screen.winScreen);
-            } else if (inputData.keyCode === ROT.KEYS.VK_ESCAPE) {
-                Game.switchScreen(Game.Screen.loseScreen);
-            } else {
-                // movement
-                if (inputData.keyCode === ROT.KEYS.VK_LEFT) {
-                    this.move(-1, 0, 0);
-                } else if (inputData.keyCode === ROT.KEYS.VK_RIGHT) {
-                    this.move(1, 0, 0);
-                } else if (inputData.keyCode === ROT.KEYS.VK_UP) {
-                    this.move(0, -1, 0);
-                } else if (inputData.keyCode === ROT.KEYS.VK_DOWN) {
-                    this.move(0, 1, 0);
-                } else if (inputData.keyCode === ROT.KEYS.VK_I) {
-                    // show the inventory
-                    this.showItemsSubScreen(Game.Screen.inventoryScreen, this._player.getItems(),
-                        'You are not carrying anything.');
-                } else if (inputData.keyCode === ROT.KEYS.VK_D) {
-                    // show the eat screen
-                    this.showItemsSubScreen(Game.Screen.dropScreen, this._player.getItems(),
-                        'You have nothing to drop.');
-                } else if (inputData.keyCode === ROT.KEYS.VK_E) {
-                    // show the eat screen
-                    this.showItemsSubScreen(Game.Screen.eatScreen, this._player.getItems(),
-                        'You have nothing to eat.');
-                } else if (inputData.keyCode === ROT.KEYS.VK_W) {
-                    if (inputData.shiftKey) {
-                        // show the wear screen
-                        this.showItemsSubScreen(Game.Screen.wearScreen, this._player.getItems(),
-                            'You have nothing to wear.');
+            // movement
+            if (inputData.keyCode === ROT.KEYS.VK_LEFT) {
+                this.move(-1, 0, 0);
+            } else if (inputData.keyCode === ROT.KEYS.VK_RIGHT) {
+                this.move(1, 0, 0);
+            } else if (inputData.keyCode === ROT.KEYS.VK_UP) {
+                this.move(0, -1, 0);
+            } else if (inputData.keyCode === ROT.KEYS.VK_DOWN) {
+                this.move(0, 1, 0);
+            } else if (inputData.keyCode === ROT.KEYS.VK_I) {
+                // show the inventory
+                this.showItemsSubScreen(Game.Screen.inventoryScreen, this._player.getItems(),
+                    'You are not carrying anything.');
+            } else if (inputData.keyCode === ROT.KEYS.VK_D) {
+                // show the eat screen
+                this.showItemsSubScreen(Game.Screen.dropScreen, this._player.getItems(),
+                    'You have nothing to drop.');
+            } else if (inputData.keyCode === ROT.KEYS.VK_E) {
+                // show the eat screen
+                this.showItemsSubScreen(Game.Screen.eatScreen, this._player.getItems(),
+                    'You have nothing to eat.');
+            } else if (inputData.keyCode === ROT.KEYS.VK_W) {
+                if (inputData.shiftKey) {
+                    // show the wear screen
+                    this.showItemsSubScreen(Game.Screen.wearScreen, this._player.getItems(),
+                        'You have nothing to wear.');
+                } else {
+                    // show the wield screen
+                    this.showItemsSubScreen(Game.Screen.wieldScreen, this._player.getItems(),
+                        'You have nothing to wield.');
+                }
+                return;
+            } else if (inputData.keyCode === ROT.KEYS.VK_X) {
+                // show the drop screen
+                this.showItemsSubScreen(Game.Screen.examineScreen, this._player.getItems(),
+                    'You have nothing to examine.');
+                return;
+            }else if (inputData.keyCode === ROT.KEYS.VK_COMMA) {
+                var items = this._player.getMap().getItemsAt(this._player.getX(), this._player.getY(), this._player.getZ());
+                // if there is only one item, directly pick it up
+                if (items && items.length === 1) {
+                    var item = items[0];
+                    if (this._player.pickupItems([0])) {
+                        Game.sendMessage(this._player, "You pick up %s.", [item.describeA()]);
                     } else {
-                        // show the wield screen
-                        this.showItemsSubScreen(Game.Screen.wieldScreen, this._player.getItems(),
-                            'You have nothing to wield.');
-                    }
-                    return;
-                } else if (inputData.keyCode === ROT.KEYS.VK_COMMA) {
-                    var items = this._player.getMap().getItemsAt(this._player.getX(), this._player.getY(), this._player.getZ());
-                    // if there is only one item, directly pick it up
-                    if (items && items.length === 1) {
-                        var item = items[0];
-                        if (this._player.pickupItems([0])) {
-                            Game.sendMessage(this._player, "You pick up %s.", [item.describeA()]);
-                        } else {
-                            Game.sendMessage(this._player, "Your inventory is full! Nothing was picked up.");
-                        }
-                    } else {
-                        this.showItemsSubScreen(Game.Screen.pickupScreen, items,
-                            'There is nothing here to pick up.');
+                        Game.sendMessage(this._player, "Your inventory is full! Nothing was picked up.");
                     }
                 } else {
-                    // not a valid key
-                    return;
+                    this.showItemsSubScreen(Game.Screen.pickupScreen, items,
+                        'There is nothing here to pick up.');
                 }
-                // unlock the engine
-                this._player.getMap().getEngine().unlock();
+            } else {
+                // not a valid key
+                return;
             }
+            // unlock the engine
+            this._player.getMap().getEngine().unlock();
         } else if (inputType === 'keypress') {
             var keyChar = String.fromCharCode(inputData.charCode);
             if (keyChar === '>') {
                 this.move(0, 0, 1);
             } else if (keyChar === '<') {
                 this.move(0, 0, -1);
+            } else if (keyChar === ';') {
+                // setup the look screen
+                var offsets = this.getScreenOffsets();
+                Game.Screen.lookScreen.setup(this._player,
+                        this._player.getX(), this._player.getY(),
+                        offsets.x, offsets.y);
+                this.setSubScreen(Game.Screen.lookScreen);
+                return;
+            } else if (keyChar === '?') {
+                // setup the help screen
+                this.setSubScreen(Game.Screen.helpScreen);
+                return;
             } else {
                 // not a valid key
                 return;
@@ -556,3 +582,182 @@ Game.Screen.gainStatScreen = {
         }
     }
 };
+
+Game.Screen.examineScreen = new Game.Screen.ItemListScreen({
+    caption: 'Choose the item you wish to examine.',
+    canSelect: true,
+    canSelectMultipleItems: false,
+    isAcceptable: function(item) {
+        return true;
+    },
+    ok: function(selectedItems) {
+        var keys = Object.keys(selectedItems);
+        if (keys.length > 0) {
+            var item = selectedItems[keys[0]];
+            Game.sendMessage(this._player, "It's %s (%s).",
+                [
+                    item.describeA(false),
+                    item.details()
+                ]);
+        }
+        return true;
+    }
+});
+
+Game.Screen.TargetBasedScreen = function(template) {
+    template = template || {};
+    // by default, our ok function does nothing and does not consume a turn
+    this._isAcceptableFunction = template['okFunction'] || function(x, y) {
+        return false;
+    };
+    // the default caption function simply returns an empty string
+    this._captionFunction = template['captionFunction'] || function(x, y) {
+        return '';
+    };
+};
+
+Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY, offsetX, offsetY) {
+    this._player = player;
+    // store the original position, subtract the offset to make life easy so we don't always
+    // have to remove it
+    this._startX = startX - offsetX;
+    this._startY = startY - offsetY;
+    // store current cursor position
+    this._cursorX = this._startX;
+    this._cursorY = this._startY;
+    // store map offsets
+    this._offsetX = offsetX; 
+    this._offsetY = offsetY;
+    // cache the FOV
+    var visibleCells = {};
+    this._player.getMap().getFov(this._player.getZ()).compute(
+        this._player.getX(), this._player.getY(),
+        this._player.getSightRadius(),
+        function(x, y, radius, visiblity) {
+            visibleCells[x + "," + y] = true;
+        }
+    );
+    this._visibleCells = visibleCells;
+};
+
+Game.Screen.TargetBasedScreen.prototype.render = function(display) {
+    Game.Screen.playScreen.renderTiles.call(Game.Screen.playScreen, display);
+
+    // draw a line from the start to the cursor
+    var points = Game.Geometry.getLine(this._startX, this._startY, this._cursorX,
+        this._cursorY);
+    console.log(points);
+
+    // render stars along the line
+    for (var i = 0, l = points.length; i < l; i++) {
+        display.drawText(points[i].x, points[i].y, '%c{magenta}*');
+    };
+
+    // render the caption at the bottom
+    display.drawText(0, Game.getScreenHeight() - 1,
+        this._captionFunction(this._cursorX + this._offsetX, this._cursorY + this._offsetY));
+};
+
+Game.Screen.TargetBasedScreen.prototype.handleInput = function(inputType, inputData) {
+    // move the cursor
+    if (inputType == 'keydown'){
+        if (inputData.keyCode === ROT.KEYS.VK_LEFT) {
+            this.moveCursor(-1, 0);
+        } else if (inputData.keyCode === ROT.KEYS.VK_RIGHT) {
+            this.moveCursor(1, 0);
+        } else if (inputData.keyCode === ROT.KEYS.VK_UP) {
+            this.moveCursor(0, -1);
+        } else if (inputData.keyCode === ROT.KEYS.VK_DOWN) {
+            this.moveCursor(0, 1);
+        } else if (inputData.keyCode === ROT.KEYS.VK_ESCAPE) {
+            Game.Screen.playScreen.setSubScreen(undefined);
+        } else if (inputData.keyCode === ROT.KEYS.VK_RETURN) {
+            this.executeOkFunction();
+        }
+    }
+    Game.refresh();
+};
+
+Game.Screen.TargetBasedScreen.prototype.moveCursor = function(dx, dy) {
+    // make sure we stay within the bounds
+    this._cursorX = Math.max(0, Math.min(this._cursorX + dx, Game.getScreenWidth()));
+    // we have to save the last line for the caption
+    this._cursorY = Math.max(0, Math.min(this._cursorY + dy, Game.getScreenWidth() - 1));
+    console.log(this._cursorX, this._cursorY);
+};
+
+Game.Screen.TargetBasedScreen.prototype.executeOkFunction = function() {
+    // switch back to the play screen
+    Game.Screen.playScreen.setSubScreen(undefined);
+    // call the OK function and end the player's turn if it returns true
+    if (this._okFunction(this._cursorX + this._offsetX, this._cursorY + this._offsetY)) {
+        this._player.getMap().getEngine().unlock();
+    }
+};
+
+Game.Screen.lookScreen = new Game.Screen.TargetBasedScreen({
+    captionFunction: function(x, y) {
+        var z = this._player.getZ();
+        var map = this._player.getMap();
+        // if the tile is explored, we can give a better caption
+        if (map.isExplored(x, y, z)) {
+            // if the tile is explored, we have to check if we can actually see it
+            // befor etesting if ther's an entity or item
+            if (this._visibleCells[x + ',' + y]) {
+                var items = map.getItemsAt(x, y, z);
+                // if we have items, we want to render the top most item
+                if (items) {
+                    var item = items[items.length - 1];
+                    return String.format('%s - %s (%s)',
+                        item.getRepresentation(),
+                        item.describeA(true),
+                        item.details());
+                // else check if there's an entity
+                } else if (map.getEntityAt(x, y, z)) {
+                    var entity = map.getEntityAt(x, y, z);
+                    return String.format('%s - %s (%s)',
+                        entity.getRepresentation(),
+                        entity.describeA(true),
+                        entity.details());
+                }
+            }
+            // if there was no entity/item or the tile wsn't visible, then 
+            // use the tile information
+            return String.format('%s - %s', 
+                map.getTile(x, y, z).getRepresentation(),
+                map.getTile(x, y, z).getDescription());
+        } else {
+            // if the tile is not exploreed, show the null tile description
+            return String.format('%s - %s',
+                Game.Tile.nullTile.getRepresentation(),
+                Game.Tile.nullTile.getDescription());
+        }
+    }
+});
+
+Game.Screen.helpScreen = {
+    render: function(display) {
+        var text = 'jsrogue help';
+        var border = '-------------';
+        var y = 0;
+        display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
+        display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, border);
+        display.drawText(0, y++, 'The villagers have been complaining of a terrible stench coming from the cave.');
+        display.drawText(0, y++, 'Find the source of this smell and get rid of it!');
+        y += 3;
+        display.drawText(0, y++, '[,] to pick up items');
+        display.drawText(0, y++, '[d] to drop items');
+        display.drawText(0, y++, '[e] to eat items');
+        display.drawText(0, y++, '[w] to wield items');
+        display.drawText(0, y++, '[W] to wield items');
+        display.drawText(0, y++, '[x] to examine items');
+        display.drawText(0, y++, '[;] to look around you');
+        display.drawText(0, y++, '[?] to show this help screen');
+        y += 3;
+        text = '--- press any key to continue ---';
+        display.drawText(Game.getScreenWidth() / 2 - text.length / 2, y++, text);
+    },
+    handleInput: function(inputType, inputData) {
+        Game.Screen.playScreen.setSubScreen(null);
+    }
+}

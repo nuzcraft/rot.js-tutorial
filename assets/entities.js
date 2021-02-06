@@ -31,6 +31,7 @@ Game.sendMessageNearby = function(map, centerX, centerY, centerZ, message, args)
 
 // player template
 Game.PlayerTemplate = {
+    name: 'human (you)',
     character: '@',
     foreground: 'white',
     maxHp: 40,
