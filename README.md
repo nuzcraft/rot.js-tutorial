@@ -3,6 +3,9 @@ Hello! Welcome to my project for learning rot.js. We'll be following this tutori
 http://www.codingcookies.com/2013/04/01/building-a-roguelike-in-javascript-part-1/
 I've not done *any* research to see if the tutorial goes all the way to the end of a finished game, but regardless, we're gonna take a shot!
 
+### 2020.02.06
+Hey! Woo! I finished up the entirety of this tutorial! The end result is a pretty fun game (if a bit easy). I'm not sure where I'm going to take this next, but I had a whole lot of fun.
+
 ### 2020.02.05
 Hoohah! I finished up the final boss section where we add a new cavern and a Giant Zombie boss. I was able to beat the game, and it was fun! It was cool to see how we could take some of the systems we'd already designed, decouple them from the specifics, and reuse code for slightly different stuff.
 
