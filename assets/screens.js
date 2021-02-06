@@ -192,7 +192,12 @@ Game.Screen.playScreen = {
                             'You have nothing to wield.');
                     }
                     return;
-                } else if (inputData.keyCode === ROT.KEYS.VK_COMMA) {
+                } else if (inputData.keyCode === ROT.KEYS.VK_X) {
+                    // show the drop screen
+                    this.showItemsSubScreen(Game.Screen.examineScreen, this._player.getItems(),
+                        'You have nothing to examine.');
+                    return;
+                }else if (inputData.keyCode === ROT.KEYS.VK_COMMA) {
                     var items = this._player.getMap().getItemsAt(this._player.getX(), this._player.getY(), this._player.getZ());
                     // if there is only one item, directly pick it up
                     if (items && items.length === 1) {
@@ -556,3 +561,24 @@ Game.Screen.gainStatScreen = {
         }
     }
 };
+
+Game.Screen.examineScreen = new Game.Screen.ItemListScreen({
+    caption: 'Choose the item you wish to examine.',
+    canSelect: true,
+    canSelectMultipleItems: false,
+    isAcceptable: function(item) {
+        return true;
+    },
+    ok: function(selectedItems) {
+        var keys = Object.keys(selectedItems);
+        if (keys.length > 0) {
+            var item = selectedItems[keys[0]];
+            Game.sendMessage(this._player, "It's %s (%s).",
+                [
+                    item.describeA(false),
+                    item.details()
+                ]);
+        }
+        return true;
+    }
+});

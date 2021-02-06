@@ -95,10 +95,6 @@ Game.DynamicGlyph.prototype.raiseEvent = function(event) {
     }
     // extract any arguments passed, removing the event name
     var args = Array.prototype.slice.call(arguments, 1);
-    // invoke each listener, with this entity as the context and the arguments
-    for (var i = 0; i < this._listeners[event].length; i++) {
-        this._listeners[event][i].apply(this, args);
-    }
     // invoke each listener, with this entity as the context
     // and the arguments
     var results = [];
