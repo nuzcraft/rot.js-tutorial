@@ -59,14 +59,51 @@ Game.Screen.playScreen = {
         };
         var screenWidth = Game.getScreenWidth();
         var screenHeight = Game.getScreenHeight();
+
+        // render the tiles
+        this.renderTiles(display);
+        
+        // get the messages in the player's queue and render them
+        var messages = this._player.getMessages();
+        var messageY = 0;
+        for (var i = 0; i < messages.length; i++) {
+            // draw each message, adding the number of lines
+            messageY += display.drawText(
+                0,
+                messageY,
+                '%c{white}%b{black}' + messages[i]
+            );
+        }
+        // render player hp
+        var stats = '%c{white}%b{black}';
+        stats += vsprintf('HP: %d/%d L: %d XP: %d',
+            [this._player.getHp(), this._player.getMaxHp(),
+            this._player.getLevel(), this._player.getExperience()]);
+        display.drawText(0, screenHeight, stats);
+        // render hunger state
+        var hungerState = this._player.getHungerState();
+        display.drawText(screenWidth - hungerState.length, screenHeight, hungerState);
+    },
+    getScreenOffsets: function() {
         // make sure the x axis doesn't go to the left of the left bound
-        var topLeftX = Math.max(0, this._player.getX() - (screenWidth / 2));
+        var topLeftX = Math.max(0, this._player.getX() - (Game.getScreenWidth() / 2));
         // make sure we still have enough space to fit an entire game screen
-        topLeftX = Math.min(topLeftX, this._player.getMap().getWidth() - screenWidth);
+        topLeftX = Math.min(topLeftX, this._player.getMap().getWidth() - Game.getScreenWidth());
         // make sure the y axis doesn't go above the top bound
-        var topLeftY = Math.max(0, this._player.getY() - (screenHeight / 2));
+        var topLeftY = Math.max(0, this._player.getY() - (Game.getScreenHeight() / 2));
         // make sure we still have enough space to fit an entire game screen
-        topLeftY = Math.min(topLeftY, this._player.getMap().getHeight() - screenHeight);
+        topLeftY = Math.min(topLeftY, this._player.getMap().getHeight() - Game.getScreenHeight());
+        return {
+            x: topLeftX,
+            y: topLeftY
+        }
+    },
+    renderTiles: function(display) {
+        var screenWidth = Game.getScreenWidth();
+        var screenHeight = Game.getScreenHeight();
+        var offsets = this.getScreenOffsets()
+        var topLeftX = offsets.x;
+        var topLeftY = offsets.y;
         // this object will keep track of all visible map cells
         var visibleCells = {};
         var map = this._player.getMap();
@@ -117,27 +154,7 @@ Game.Screen.playScreen = {
                 }
             }
         };
-        // get the messages in the player's queue and render them
-        var messages = this._player.getMessages();
-        var messageY = 0;
-        for (var i = 0; i < messages.length; i++) {
-            // draw each message, adding the number of lines
-            messageY += display.drawText(
-                0,
-                messageY,
-                '%c{white}%b{black}' + messages[i]
-            );
-        }
-        // render player hp
-        var stats = '%c{white}%b{black}';
-        stats += vsprintf('HP: %d/%d L: %d XP: %d',
-            [this._player.getHp(), this._player.getMaxHp(),
-            this._player.getLevel(), this._player.getExperience()]);
-        display.drawText(0, screenHeight, stats);
-        // render hunger state
-        var hungerState = this._player.getHungerState();
-        display.drawText(screenWidth - hungerState.length, screenHeight, hungerState);
-    },
+    }
     handleInput: function(inputType, inputData) {
         // if the game is over, enter will bring the user to the losing screen.
         if (this._gameEnded) {
