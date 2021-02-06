@@ -646,7 +646,6 @@ Game.Screen.TargetBasedScreen.prototype.render = function(display) {
     // draw a line from the start to the cursor
     var points = Game.Geometry.getLine(this._startX, this._startY, this._cursorX,
         this._cursorY);
-    console.log(points);
 
     // render stars along the line
     for (var i = 0, l = points.length; i < l; i++) {
@@ -683,7 +682,6 @@ Game.Screen.TargetBasedScreen.prototype.moveCursor = function(dx, dy) {
     this._cursorX = Math.max(0, Math.min(this._cursorX + dx, Game.getScreenWidth()));
     // we have to save the last line for the caption
     this._cursorY = Math.max(0, Math.min(this._cursorY + dy, Game.getScreenWidth() - 1));
-    console.log(this._cursorX, this._cursorY);
 };
 
 Game.Screen.TargetBasedScreen.prototype.executeOkFunction = function() {
