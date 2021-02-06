@@ -112,26 +112,10 @@ Game.EntityMixins.Destructible = {
         // if have 0 hp or less, remove ourselves from the map
         if (this._hp <= 0) {
             Game.sendMessage(attacker, 'You kill the %s!', [this.getName()]);
-            // if the entity has a corpse dropper mixin, try to add a corpse
-            if (this.hasMixin(Game.EntityMixins.CorpseDropper)) {
-                this.tryDropCorpse();
-            }
+            // raise events
+            this.raiseEvent('onDeath', attacker);
+            attacker.raiseEvent('onKill', this);
             this.kill();
-            // give the attacker experience points
-            if (attacker.hasMixin('ExperienceGainer')) {
-                var exp = this.getMaxHp() + this.getDefenseValue();
-                if (this.hasMixin('Attacker')) {
-                    exp += this.getAttackValue();
-                }
-                // account for level differences
-                if (this.hasMixin('ExperienceGainer')) {
-                    exp -= (attacker.getLevel() - this.getLevel()) * 3;
-                }
-                // only give experience if more than 0
-                if (exp > 0) {
-                    attacker.giveExperience(exp);
-                }
-            }
         }
     },
     increaseDefenseValue: function(value) {
@@ -148,8 +132,14 @@ Game.EntityMixins.Destructible = {
         this._maxHp += value;
         this._hp += value;
         Game.sendMessage(this, "You look healthier!");
+    },
+    listeners: {
+        onGainLevel: function() {
+            // heal the entity
+            this.setHp(this.getMaxHp());
+        }
     }
-}
+};
 
 Game.EntityMixins.Attacker = {
     name: 'Attacker',
@@ -377,14 +367,17 @@ Game.EntityMixins.CorpseDropper = {
         // chance of dropping a corpse (out of 100)
         this._corpseDropRate = template['corpseDropRate'] || 100;
     },
-    tryDropCorpse: function() {
-        if (Math.round(Math.random() * 100) < this._corpseDropRate) {
-            // create a new corpse item and drop it
-            this._map.addItem(this.getX(), this.getY(), this.getZ(),
-                Game.ItemRepository.create('corpse', {
-                    name: this._name + ' corpse',
-                    foreground: this._foreground
-                }));
+    listeners: {
+        onDeath: function(attacker) {
+            // check if we should drop a corpse
+            if (Math.round(Math.random() * 100) <= this._corpseDropRate) {
+                // create a new corpse item and drop it
+                this._map.addItem(this.getX(), this.getY(), this.getZ(),
+                    Game.ItemRepository.create('corpse', {
+                        name: this._name + ' corpse',
+                        foreground: this._foreground
+                    }));
+            }
         }
     }
 };
@@ -557,12 +550,22 @@ Game.EntityMixins.ExperienceGainer = {
         // check if we gained at least one level
         if (levelsGained > 0) {
             Game.sendMessage(this, "You advance to level %d.", [this._level]);
-            // heal the entity if possible
-            if (this.hasMixin('Destructible')) {
-                this.setHp(this.getMaxHp());
+            this.raiseEvent('onGainLevel');
+        }
+    },
+    listeners: {
+        onKill: function(victim) {
+            var exp = victim.getMaxHp() + victim.getDefenseValue();
+            if (victim.hasMixin('Attacker')) {
+                exp += victim.getAttackValue();
             }
-            if (this.hasMixin('StatGainer')) {
-                this.onGainLevel();
+            // account for level differences
+            if (victim.hasMixin('ExperienceGainer')) {
+                exp -= (this.getLevel() - victim.getLevel()) * 3;
+            }
+            // only give experience if its more than 0.
+            if (exp > 0) {
+                this.giveExperience(exp);
             }
         }
     }
@@ -571,14 +574,16 @@ Game.EntityMixins.ExperienceGainer = {
 Game.EntityMixins.RandomStatGainer = {
     name: 'RandomStatGainer',
     groupName: 'StatGainer',
-    onGainLevel: function() {
-        var statOptions = this.getStatOptions();
-        // randomly select a stat option and execute the callback for each
-        // stat point
-        while (this.getStatPoints() > 0) {
-            // call the stat increasing function with this as the context
-            statOptions.random()[1].call(this);
-            this.setStatPoints(this.getStatPoints() - 1);
+    listeners: {
+        onGainLevel: function() {
+            var statOptions = this.getStatOptions();
+            // randomly select a stat option and execute the callback for each
+            // stat point
+            while (this.getStatPoints() > 0) {
+                // call the stat increasing function with this as the context
+                statOptions.random()[1].call(this);
+                this.setStatPoints(this.getStatPoints() - 1);
+            }
         }
     }
 };
@@ -586,9 +591,65 @@ Game.EntityMixins.RandomStatGainer = {
 Game.EntityMixins.PlayerStatGainer = {
     name: 'PlayerStatGainer',
     groupName: 'StatGainer',
-    onGainLevel: function() {
-        // setup the gain stat screen and show it
-        Game.Screen.gainStatScreen.setup(this);
-        Game.Screen.playScreen.setSubScreen(Game.Screen.gainStatScreen);
+    listeners: {
+        onGainLevel: function() {
+            // setup the gain stat screen and show it
+            Game.Screen.gainStatScreen.setup(this);
+            Game.Screen.playScreen.setSubScreen(Game.Screen.gainStatScreen);
+        }
     }
 };
+
+Game.EntityMixins.GiantZombieActor = Game.extend(Game.EntityMixins.TaskActor, {
+    init: function(template) {
+        // call the task actor init with the right tasks
+        Game.EntityMixins.TaskActor.init.call(this, Game.extend(template, {
+            'tasks' : ['growArm', 'spawnSlime', 'hunt', 'wander']
+        }));
+        // we only want to grow the arm once
+        this._hasGrownArm = false;
+    },
+    canDoTask: function(task) {
+        // if we haven't already grown arm and HP <= 20, then we can grow
+        if (task === 'growArm') {
+            return this.getHp() <= 20 && !this._hasGrownArm;
+        // spawn a slime only a 10% of turns
+        } else if (task === 'spawnSlime') {
+            return Math.round(Math.random() * 100) <= 10;
+        // call parent canDoTask
+        } else {
+            return Game.EntityMixins.TaskActor.canDoTask.call(this, task);
+        }
+    },
+    growArm: function() {
+        this._hasGrownArm = true;
+        this.increaseAttackValue(5);
+        // send a message saying the zombie grew an arm
+        Game.sendMessageNearby(this.getMap(),
+            this.getX(), this.getY(), this.getZ(),
+            'An extra arm appears on the giant zombie!');
+    },
+    spawnSlime: function() {
+        //generate a random position nearby
+        var xOffset = Math.floor(Math.random() * 3) - 1;
+        var yOffset = Math.floor(Math.random() * 3) - 1;
+        // check if we can spawn an entity at that position
+        if (!this.getMap().isEmptyFloor(this.getX() + xOffset, this.getY() + yOffset,
+            this.getZ())) {
+            // if we can't, do nothing
+            return;
+        }
+        // create the entity
+        var slime = Game.EntityRepository.create('slime');
+        slime.setX(this.getX() + xOffset);
+        slime.setY(this.getY() + yOffset);
+        slime.setZ(this.getZ());
+        this.getMap().addEntity(slime);
+    },
+    listeners: {
+        onDeath: function(attacker) {
+            // switch to win screen when killed
+            Game.switchScreen(Game.Screen.winScreen);
+        }
+    }
+});

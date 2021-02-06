@@ -16,37 +16,6 @@ Game.Map = function(tiles, player) {
     // create the engine and scheduler
     this._scheduler = new ROT.Scheduler.Speed();
     this._engine = new ROT.Engine(this._scheduler);
-    // add the player on the first depth
-    this._player = player;
-    this.addEntityAtRandomPosition(player, 0);
-    // add random enemies and items to each floor
-    for (var z = 0; z < this._depth; z++) {
-        // 15 entities per floor
-        for (var i = 0; i < 15; i++) {
-            // add a random entity
-            var entity = Game.EntityRepository.createRandom();
-            this.addEntityAtRandomPosition(entity, z);
-            // level up the entity based on the floor
-            if (entity.hasMixin('ExperienceGainer')) {
-                for (var level = 0; level < z; level++) {
-                    entity.giveExperience(entity.getNextLevelExperience() -
-                        entity.getExperience())
-                }
-            }
-        }
-        // 10 items per floor
-        for (var i = 0; i < 10; i++) {
-            // add a random entity
-            this.addItemAtRandomPosition(Game.ItemRepository.createRandom(), z);
-        }
-    }
-    // add weapons and armor to the map in random positions
-    var templates = ['dagger', 'sword', 'staff',
-        'tunic', 'chainmail', 'platemail'];
-    for (var i = 0; i < templates.length; i++) {
-        this.addItemAtRandomPosition(Game.ItemRepository.create(templates[i]),
-            Math.floor(this._depth * Math.random()));
-    }
     // set up the explored array
     this._explored = new Array(this._depth);
     this._setupExploredArray();
@@ -116,6 +85,10 @@ Game.Map.prototype.addEntity = function(entity) {
     if (entity.hasMixin('Actor')) {
         this._scheduler.add(entity, true);
     }
+    // if the entity is the player, set the player
+    if (entity.hasMixin(Game.EntityMixins.PlayerActor)) {
+        this._player = entity;
+    }
 }
 
 Game.Map.prototype.addEntityAtRandomPosition = function(entity, z) {
@@ -135,6 +108,10 @@ Game.Map.prototype.removeEntity = function(entity) {
     // if the entity is an actor, remove them from the scheduler
     if (entity.hasMixin('Actor')) {
         this._scheduler.remove(entity);
+    }
+    // if the entity is the player, update the player field
+    if (entity.hasMixin(Game.EntityMixins.PlayerActor)) {
+        this._player = undefined;
     }
 }
 
