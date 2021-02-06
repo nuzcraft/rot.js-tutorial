@@ -153,71 +153,63 @@ Game.Screen.playScreen = {
             return;
         };
         if (inputType === 'keydown') {
-            // if enter is pressed, go to the win screen
-            // if escape is pressed, go to the lose screen
-            if (inputData.keyCode === ROT.KEYS.VK_RETURN) {
-                Game.switchScreen(Game.Screen.winScreen);
-            } else if (inputData.keyCode === ROT.KEYS.VK_ESCAPE) {
-                Game.switchScreen(Game.Screen.loseScreen);
-            } else {
-                // movement
-                if (inputData.keyCode === ROT.KEYS.VK_LEFT) {
-                    this.move(-1, 0, 0);
-                } else if (inputData.keyCode === ROT.KEYS.VK_RIGHT) {
-                    this.move(1, 0, 0);
-                } else if (inputData.keyCode === ROT.KEYS.VK_UP) {
-                    this.move(0, -1, 0);
-                } else if (inputData.keyCode === ROT.KEYS.VK_DOWN) {
-                    this.move(0, 1, 0);
-                } else if (inputData.keyCode === ROT.KEYS.VK_I) {
-                    // show the inventory
-                    this.showItemsSubScreen(Game.Screen.inventoryScreen, this._player.getItems(),
-                        'You are not carrying anything.');
-                } else if (inputData.keyCode === ROT.KEYS.VK_D) {
-                    // show the eat screen
-                    this.showItemsSubScreen(Game.Screen.dropScreen, this._player.getItems(),
-                        'You have nothing to drop.');
-                } else if (inputData.keyCode === ROT.KEYS.VK_E) {
-                    // show the eat screen
-                    this.showItemsSubScreen(Game.Screen.eatScreen, this._player.getItems(),
-                        'You have nothing to eat.');
-                } else if (inputData.keyCode === ROT.KEYS.VK_W) {
-                    if (inputData.shiftKey) {
-                        // show the wear screen
-                        this.showItemsSubScreen(Game.Screen.wearScreen, this._player.getItems(),
-                            'You have nothing to wear.');
+            // movement
+            if (inputData.keyCode === ROT.KEYS.VK_LEFT) {
+                this.move(-1, 0, 0);
+            } else if (inputData.keyCode === ROT.KEYS.VK_RIGHT) {
+                this.move(1, 0, 0);
+            } else if (inputData.keyCode === ROT.KEYS.VK_UP) {
+                this.move(0, -1, 0);
+            } else if (inputData.keyCode === ROT.KEYS.VK_DOWN) {
+                this.move(0, 1, 0);
+            } else if (inputData.keyCode === ROT.KEYS.VK_I) {
+                // show the inventory
+                this.showItemsSubScreen(Game.Screen.inventoryScreen, this._player.getItems(),
+                    'You are not carrying anything.');
+            } else if (inputData.keyCode === ROT.KEYS.VK_D) {
+                // show the eat screen
+                this.showItemsSubScreen(Game.Screen.dropScreen, this._player.getItems(),
+                    'You have nothing to drop.');
+            } else if (inputData.keyCode === ROT.KEYS.VK_E) {
+                // show the eat screen
+                this.showItemsSubScreen(Game.Screen.eatScreen, this._player.getItems(),
+                    'You have nothing to eat.');
+            } else if (inputData.keyCode === ROT.KEYS.VK_W) {
+                if (inputData.shiftKey) {
+                    // show the wear screen
+                    this.showItemsSubScreen(Game.Screen.wearScreen, this._player.getItems(),
+                        'You have nothing to wear.');
+                } else {
+                    // show the wield screen
+                    this.showItemsSubScreen(Game.Screen.wieldScreen, this._player.getItems(),
+                        'You have nothing to wield.');
+                }
+                return;
+            } else if (inputData.keyCode === ROT.KEYS.VK_X) {
+                // show the drop screen
+                this.showItemsSubScreen(Game.Screen.examineScreen, this._player.getItems(),
+                    'You have nothing to examine.');
+                return;
+            }else if (inputData.keyCode === ROT.KEYS.VK_COMMA) {
+                var items = this._player.getMap().getItemsAt(this._player.getX(), this._player.getY(), this._player.getZ());
+                // if there is only one item, directly pick it up
+                if (items && items.length === 1) {
+                    var item = items[0];
+                    if (this._player.pickupItems([0])) {
+                        Game.sendMessage(this._player, "You pick up %s.", [item.describeA()]);
                     } else {
-                        // show the wield screen
-                        this.showItemsSubScreen(Game.Screen.wieldScreen, this._player.getItems(),
-                            'You have nothing to wield.');
-                    }
-                    return;
-                } else if (inputData.keyCode === ROT.KEYS.VK_X) {
-                    // show the drop screen
-                    this.showItemsSubScreen(Game.Screen.examineScreen, this._player.getItems(),
-                        'You have nothing to examine.');
-                    return;
-                }else if (inputData.keyCode === ROT.KEYS.VK_COMMA) {
-                    var items = this._player.getMap().getItemsAt(this._player.getX(), this._player.getY(), this._player.getZ());
-                    // if there is only one item, directly pick it up
-                    if (items && items.length === 1) {
-                        var item = items[0];
-                        if (this._player.pickupItems([0])) {
-                            Game.sendMessage(this._player, "You pick up %s.", [item.describeA()]);
-                        } else {
-                            Game.sendMessage(this._player, "Your inventory is full! Nothing was picked up.");
-                        }
-                    } else {
-                        this.showItemsSubScreen(Game.Screen.pickupScreen, items,
-                            'There is nothing here to pick up.');
+                        Game.sendMessage(this._player, "Your inventory is full! Nothing was picked up.");
                     }
                 } else {
-                    // not a valid key
-                    return;
+                    this.showItemsSubScreen(Game.Screen.pickupScreen, items,
+                        'There is nothing here to pick up.');
                 }
-                // unlock the engine
-                this._player.getMap().getEngine().unlock();
+            } else {
+                // not a valid key
+                return;
             }
+            // unlock the engine
+            this._player.getMap().getEngine().unlock();
         } else if (inputType === 'keypress') {
             var keyChar = String.fromCharCode(inputData.charCode);
             if (keyChar === '>') {
