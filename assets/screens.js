@@ -591,3 +591,92 @@ Game.Screen.examineScreen = new Game.Screen.ItemListScreen({
         return true;
     }
 });
+
+Game.Screen.TargetBasedScreen = function(template) {
+    template = template || {};
+    // by default, our ok function does nothing and does not consume a turn
+    this._isAcceptableFunction = template['okFunction'] || function(x, y) {
+        return false;
+    };
+    // the default caption function simply returns an empty string
+    this._captionFunction = template['captionFunction'] || function(x, y) {
+        return '',
+    };
+};
+
+Game.Screen.TargetBasedScreen.prototype.setup = function(player, startX, startY, offsetX, offsetY) {
+    this._player = player;
+    // store the original position, subtract the offset to make life easy so we don't always
+    // have to remove it
+    this._startX = startX - offsetX;
+    this._startY = startY - offsetY;
+    // store current cursor position
+    this._cursorX = this._startX;
+    this._cursorY = this._startY;
+    // store map offsets
+    this._offsetX = offsetX; 
+    this._offsetY = offsetY;
+    // cache the FOV
+    var visibleCells = {};
+    this._player.getMap().getFov(this._player.getZ()).compute(
+        this._player.getX(), this._player.getY(),
+        this._player.getSightRadius(),
+        function(x, y, radius, visiblity) {
+            visibleCells[x + "," + y] = true;
+        }
+    );
+    this._visibleCells = visibleCells;
+};
+
+Game.Screen.TargetBasedScreen.prototype.render = function(display) {
+    Game.Screen.playScreen.renderTiles.call(Game.Screen.playScreen, display);
+
+    // draw a line from the start to the cursor
+    var points = Game.Geometry.getLine(this._startX, this._startY, this.cursorX,
+        this.cursorY);
+
+    // render stars along the line
+    for (var i = 0, l = points.length; i < l; i++) {
+        display.drawText(points[i].x, points[i].y, '%c{magenta}*');
+    };
+
+    // render the caption at the bottom
+    display.drawText(0, Game.getScreenHeight() - 1,
+        this._captionFunction(this._cursorX + this._offsetX, this._cursorY + this._offsetY));
+};
+
+Game.Screen.TargetBasedScreen.prototype.handleInput = function(inputType, inputData) {
+    // move the cursor
+    if (inputType == 'keydown'){
+        if (inputData.keyCode === ROT.KEYS.VK_LEFT) {
+            this,moveCursor(-1, 0);
+        } else if (inputData.keyCode === ROT.KEYS.VK_RIGHT) {
+            this.moveCursor(1, 0);
+        } else if (inputData.keyCode === ROT.KEYS.VK_UP) {
+            this.moveCursor(0, -1);
+        } else if (inputData.keyCode === ROT.KEYS.VK_DOWN) {
+            this.moveCursor(0, 1);
+        } else if (inputData.keyCode === ROT.KEYS.VK_ESCAPE) {
+            Game.Screen.playScreen.setSubScreen(undefined);
+        } else if (inputData.keyCode === ROT.KEYS.VK_RETURN) {
+            this.executeOkFunction();
+        }
+    }
+    Game.refresh();
+};
+
+Game.Screen.TargetBasedScreen.prototype.moveCursor = function(dx, dy) {
+    // make sure we stay within the bounds
+    this._cursorX = Matph.max(0, Math.min(this._cursorX + dx, Game.getScreenWidth()));
+    // we have to save the last line for the caption
+    this._cursorY = Math.max(0, Math.min(this._cursorY + dy, Game.getScreenWidth() - 1));
+};
+
+Game.Screen.TargetBassedScreen.prototype.executeOkFunction = function() {
+    // switch back to the play screen
+    Game.Screen.playScreen.setSubScreen(undefined);
+    // call the OK function and end the player's turn if it returns true
+    if (this._okFunction(this._cursorX + this._offsetX, this._cursorY + this._offsetY)) {
+        this._player.getMap().getEngine().unlock();
+    }
+};
